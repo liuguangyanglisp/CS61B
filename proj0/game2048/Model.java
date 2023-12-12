@@ -92,7 +92,87 @@ public class Model extends Observable {
         board.addTile(tile);
         checkGameOver();
         setChanged();
+
     }
+
+    //tilt tiles of a single column from top to botoom;
+    public void coltilt(int col,int topTileIdex){
+        if (topTileIdex >= 1) {
+            //make sure toptile is real(not null);
+            //or the whole column is null;
+            for (int row = topTileIdex; row >= 0; row -= 1) {
+                if (board.tile(col, row) == null) {
+                    continue;
+                }
+
+                if (board.tile(col, topTileIdex) == null) {
+                    board.move(col, topTileIdex, board.tile(col, row));
+                    changed = true;
+                }
+
+                break;
+            }
+            //find the second real tile from the second tileIndex of the column
+            //if no, end forloop;
+            int empty = 0;
+            for (int row = topTileIdex - 1; row >= 0; row -= 1) {
+                if (board.tile(col, row) == null) {
+                    empty += 1;
+                    continue;
+                }
+                //check if the first two tile can merge, and move accordingly;
+                //coltilt the rest tile from a new toptile recursively;
+                if (board.tile(col, row).value() == board.tile(col, row + 1 + empty).value()) {
+                    board.move(col, row + 1 + empty, board.tile(col, row));
+                    changed = true;
+                    score = score + board.tile(col, row + 1 + empty).value();
+                } else if (empty > 0) {
+                    board.move(col, row + empty, board.tile(col, row));
+                    changed = true;
+                }
+                coltilt(col, row + empty);
+                }
+
+            }
+        }
+
+
+
+   /* former version try to solve tilt problem.(wrong solution)
+   public void coltile(int col){
+            int empty = 0;
+            for (int row = size() - 1; row >= 0; row -= 1) {
+
+                if (board.tile(col,row) == null) {
+                    empty += 1;
+                    continue;
+                }
+
+                if (row == board.size() - 1)
+                    continue;
+
+                if (board.tile(col,size()-1) == null) {
+                    board.move(col, row  + empty , board.tile(col,row));
+                    changed = true;
+                    continue;
+                }
+
+
+                if (board.tile(col,row+1+empty) == null){
+                board.move(col, row + 1 + empty, board.tile(col,row));
+                } else if (board.tile(col,row).value() == board.tile(col,row+1+empty).value()) {
+                    board.move(col, row + 1 + empty, board.tile(col,row));
+                    changed = true;
+                    score = score + board.tile(col,row+1+empty).value();
+                } else {
+                    board.move(col, row + 1, board.tile(col,row));
+                    changed = true;
+
+                }
+            }
+        }*/
+
+
 
     /** Tilt the board toward SIDE. Return true iff this changes the board.
      *
@@ -106,9 +186,17 @@ public class Model extends Observable {
      *    value, then the leading two tiles in the direction of motion merge,
      *    and the trailing tile does not.
      * */
+
+    public boolean changed = false;
+
     public boolean tilt(Side side) {
-        boolean changed;
-        changed = false;
+        //board.setViewingPerspective(side);
+        board.setViewingPerspective(side);
+        for (int col = 0; col <= size() - 1; col +=1) {
+            coltilt(col, size()-1);
+        }
+
+        board.setViewingPerspective(Side.NORTH);
 
         // TODO: Modify this.board (and perhaps this.score) to account
         // for the tilt to the Side SIDE. If the board changed, set the
@@ -156,6 +244,7 @@ public class Model extends Observable {
      */
     public static boolean maxTileExists(Board b) {
         // TODO: Fill in this function.
+
         for (int row = 0; row < b.size(); row += 1) {
             for (int col = 0; col < b.size(); col += 1){
                 if (b.tile(col, row) != null) {
@@ -176,26 +265,31 @@ public class Model extends Observable {
      */
     public static boolean atLeastOneMoveExists(Board b) {
         // TODO: Fill in this function.
-        for (int row = 0; row < b.size(); row += 1){
-            for (int col = 0; col < b.size(); col += 1){
+        boolean validMoves = false;
+        for (int col = 0; col <= b.size() - 1; col += 1){
+            for (int row = b.size()-1; row >= 0; row -= 1){
                 if (b.tile(col, row) == null) {
-                    return true;
-                } else {
-                    if (row + 1 < b.size() && b.tile(col, row).value() == b.tile(col, row + 1).value()) {
-                        return true;
-                    } else if (col + 1 < b.size() && b.tile(col, row).value() == b.tile(col + 1, row).value()) {
-                        return true;
-                    } else if (col - 1 >= 0 && b.tile(col, row).value() == b.tile(col - 1, row).value()) {
-                        return true;
-                    } else if (row - 1 >= 0 && b.tile(col, row).value() == b.tile(col, row - 1).value()) {
-                        return true;
-                    }
+                    validMoves = true;
+                    break;
                 }
-
             }
         }
 
-        return false;
+        if (validMoves == false){
+            for (int col = 0; col <= b.size() - 1; col += 1){
+                for (int row = b.size()-1; row >= 0; row -= 1){
+                    if (row> 0 && b.tile(col,row).value() == b.tile(col,row -1).value()){
+                        validMoves = true;
+                        break;
+                    }
+                    if (col> 0 && b.tile(col,row).value() == b.tile(col-1,row).value()){
+                        validMoves = true;
+                        break;
+                    }
+                }
+            }
+        }
+        return validMoves;
     }
 
 
