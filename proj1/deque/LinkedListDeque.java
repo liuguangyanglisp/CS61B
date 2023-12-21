@@ -9,6 +9,11 @@ public class LinkedListDeque<T> {
         public T item;
         public Node next;
 
+        public Node() {
+            Node prev;
+            T item;
+            Node next;
+        }
         public Node(Node prevNode, T aitem, Node nextNode) {
             prev = prevNode;
             item = aitem;
@@ -30,26 +35,32 @@ public class LinkedListDeque<T> {
     }
 
     public LinkedListDeque() {
-        sentinel = new Node(null, null, null);
+        sentinel = new Node();
         sentinel.next = sentinel;
         sentinel.prev = sentinel;
-        size = 0;
+        int size = 0;
     }
 
     public void addFirst(T item) {
+
         sentinel.next = new Node(sentinel, item, sentinel.next);
         sentinel.next.next.prev = sentinel.next;
         size += 1;
     }
 
     public void addLast(T item) {
+
         sentinel.prev = new Node(sentinel.prev, item, sentinel);
         sentinel.prev.prev.next = sentinel.prev;
         size += 1;
     }
 
     public boolean isEmpty() {
-        return sentinel.next == null;
+        if (sentinel.next == sentinel) {
+            return true;
+        }else {
+            return false;
+        }
     }
 
     //*Returns the number of items in the deque.*/
@@ -118,17 +129,6 @@ public class LinkedListDeque<T> {
 
     public T getRecursive(int index) {
         return sentinel.next.getRecursive(index);
-    }
-
-
-    public static void main(String[] args) {
-        LinkedListDeque<Integer> L = new LinkedListDeque<>();
-        L.addFirst(5);
-        L.addFirst(17);
-        L.addFirst(38);
-        L.addFirst(13);
-        L.removeLast();
-        L.printDeque();
     }
 
 }
