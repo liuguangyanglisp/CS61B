@@ -42,14 +42,12 @@ public class LinkedListDeque<T> {
     }
 
     public void addFirst(T item) {
-
         sentinel.next = new Node(sentinel, item, sentinel.next);
         sentinel.next.next.prev = sentinel.next;
         size += 1;
     }
 
     public void addLast(T item) {
-
         sentinel.prev = new Node(sentinel.prev, item, sentinel);
         sentinel.prev.prev.next = sentinel.prev;
         size += 1;
@@ -78,6 +76,7 @@ public class LinkedListDeque<T> {
             if (Deque == sentinel)
                 break;
         }
+        System.out.println();
     }
 
     /*Removes and returns the item at the front of the deque.
