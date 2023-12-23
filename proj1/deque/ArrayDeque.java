@@ -1,7 +1,5 @@
 package deque;
-
 import com.sun.xml.internal.xsom.impl.scd.Iterators;
-
 import java.util.Iterator;
 
 public class ArrayDeque<T> implements Iterable<T> {
@@ -37,6 +35,9 @@ public class ArrayDeque<T> implements Iterable<T> {
     }
 
     public void addFirst(T x) {
+        if (size == items.length){
+            reSize(size * 2);
+        }
         items[nextFirst] = x;
         size += 1;
         nextFirst = minusOne(nextFirst);
@@ -45,6 +46,9 @@ public class ArrayDeque<T> implements Iterable<T> {
 
     /** Inserts X into the back of the list. */
     public void addLast(T x) {
+        if (size == items.length){
+            reSize(size * 2);
+        }
         items[nextLast] = x;
         size += 1;
         nextLast = plusOne(nextLast);
@@ -68,6 +72,10 @@ public class ArrayDeque<T> implements Iterable<T> {
     }
 
     public T removeFirst(){
+        double usageRate = (size - 1) / (items.length * 1.0);
+        if ( items.length >= 16 && usageRate < 0.25){
+            reSize(items.length / 2);
+        }
         T tempFirstItem = items[plusOne(nextFirst)];
         items[plusOne(nextFirst)] = null;
         nextFirst = plusOne(nextFirst);
@@ -78,6 +86,10 @@ public class ArrayDeque<T> implements Iterable<T> {
     /** Deletes item from back of the list and
      * returns deleted item. */
     public T removeLast() {
+        double usageRate = (size - 1) / (items.length * 1.0);
+        if ( items.length >= 16 && usageRate < 0.25){
+            reSize(items.length / 2);
+        }
         T tempLastItem = items[minusOne(nextLast)];
         items[minusOne(nextLast)] = null;
         nextLast = minusOne(nextLast);
@@ -139,9 +151,19 @@ public class ArrayDeque<T> implements Iterable<T> {
         return true;
     }
 
+    public void reSize(int n){
+            T[] tempItems = (T[]) new Object[n];
+            for (int i = 0; i <= size - 1; i += 1){
+                tempItems [i] = get(i);
+            }
+            items = tempItems;
+            nextFirst = items.length - 1;
+            nextLast = size;
+            tempItems = null;
+    }
 
     public static void main(String[]args){
-        /*ArrayDeque<Integer> L = new ArrayDeque<>();
+/*        ArrayDeque<Integer> L = new ArrayDeque<>();
         L.addFirst(1);
         L.addLast(2);
         L.addLast(3);
@@ -166,15 +188,32 @@ public class ArrayDeque<T> implements Iterable<T> {
         System.out.println(L.size);*/
 
         ArrayDeque<Integer> A = new ArrayDeque<>();
-        /*A.addFirst(1);
+        A.addFirst(1);
         A.addLast(2);
         A.addLast(3);
-        A.addFirst(4);*/
-        ArrayDeque<String> B = new ArrayDeque<>();
-        /*B.addFirst("1");
+        A.addFirst(4);
+        /*ArrayDeque<String> B = new ArrayDeque<>();
+        B.addFirst("1");
         B.addLast("2");
         B.addLast("3");
-        B.addFirst("4");*/
-        System.out.println(A.equals(B));
+        B.addFirst("4");
+        System.out.println(A.equals(B));*/
+        /*A.removeLast();
+        A.removeLast();
+        A.removeLast();
+        A.removeLast();*/
+        A.addFirst(1);
+        A.addLast(2);
+        A.addLast(3);
+        A.addFirst(4);
+        A.addFirst(10);
+        A.removeLast();
+        A.removeLast();
+        A.removeLast();
+        A.removeLast();
+        A.removeLast();
+        A.removeLast();
+        A.removeLast();
+        A.removeLast();
     }
 }

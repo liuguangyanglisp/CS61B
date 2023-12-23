@@ -1,7 +1,5 @@
 package deque;
-
 import java.util.Iterator;
-
 public class LinkedListDeque<T> implements Iterable<T> {
     private Node sentinel;
     private int size;
@@ -195,17 +193,25 @@ public class LinkedListDeque<T> implements Iterable<T> {
         System.out.println(L.isEmpty());
         System.out.println(L.size);*/
 
-        ArrayDeque<Integer> A = new ArrayDeque<>();
-        /*A.addFirst(1);
+        LinkedListDeque<Integer> A = new LinkedListDeque<>();
+        A.addFirst(1);
         A.addLast(2);
         A.addLast(3);
-        A.addFirst(4);*/
-        ArrayDeque<Integer> B = new ArrayDeque<>();
-        B.addFirst(1);
+        A.addFirst(4);
+        LinkedListDeque<Integer> B = new LinkedListDeque<>();
+        /*B.addFirst(1);
         B.addLast(2);
         B.addLast(3);
         B.addFirst(4);
-        System.out.println(A.equals(B));
+        System.out.println(A.equals(B));*/
+        A.removeLast();
+        A.removeLast();
+        A.removeLast();
+        A.removeLast();
+        A.addFirst(1);
+        A.addLast(2);
+        A.addLast(3);
+        A.addFirst(4);
     }
 
 }
