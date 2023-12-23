@@ -2,7 +2,9 @@ package deque;
 
 import com.sun.xml.internal.xsom.impl.scd.Iterators;
 
-public class ArrayDeque<T> {
+import java.util.Iterator;
+
+public class ArrayDeque<T> implements Iterable<T> {
     /** Creates an empty list. */
     private T[] items;
     private int size;
@@ -49,10 +51,7 @@ public class ArrayDeque<T> {
     }
 
     public boolean isEmpty(){
-        if (size == 0) {
-            return true;
-        }
-        return false;
+        return size == 0;
     }
 
     public int size(){
@@ -90,37 +89,92 @@ public class ArrayDeque<T> {
         if (index >= size || index < 0){
             return null;
         }
-        int actualIndex = IndexTranslate(index);
+        int actualIndex = indexTranslate(index);
         return items[actualIndex];
     }
-
-    public int IndexTranslate(int index){
+    public int indexTranslate(int index){
         int newIndex = plusOne(nextFirst) + index;
         if (newIndex > items.length - 1)
             newIndex = newIndex - items.length;
         return newIndex;
     }
+    public Iterator<T> iterator(){
+        return new ArrayDequeIterator();
+    }
 
+    private class ArrayDequeIterator implements Iterator<T> {
+        int position;
+        public ArrayDequeIterator(){
+            position = plusOne(nextFirst);
+        }
+        public boolean hasNext() {
+            return position != nextLast;
+        }
+        public T next() {
+            T returnItem = items[position];
+            position = plusOne(position);
+            return returnItem;
+        }
+    }
+    /*Returns whether the parameter o is equal to the Deque*/
+    public boolean equals(Object o){
+        if (this == o) {
+            return true;
+        }
+
+        /* If we apply the instanceof operator with any variable that has null value, it returns false.*/
+        if (o instanceof ArrayDeque) {
+        }else {
+            return false;
+        }
+
+        ArrayDeque other = (ArrayDeque) o;
+        if (other.size() != this.size()) {
+            return false;
+        }
+        for (int i = 0; i <= size - 1; i += 1){
+            if (this.get(i) != other.get(i))
+                return false;
+        }
+        return true;
+    }
 
 
     public static void main(String[]args){
-        ArrayDeque<Integer> L = new ArrayDeque<>();
+        /*ArrayDeque<Integer> L = new ArrayDeque<>();
         L.addFirst(1);
         L.addLast(2);
-        /*L.addLast(3);
+        L.addLast(3);
         L.addFirst(4);
-        L.isEmpty();
-        System.out.println(L.get(0));
-        System.out.println(L.get(1));
-        System.out.println(L.get(2));
-        System.out.println(L.get(3));
+        System.out.println(L.isEmpty());
+
+        Iterator<Integer> seer = L.iterator();
+
+        while (seer.hasNext()){
+            System.out.println(seer.next());
+        }
+
+        for (Integer i : L){
+            System.out.println(i);
+        }
+
         System.out.println(L.get(10));
         L.printDeque();
-        L.printDeque();*/
         System.out.println(L.removeFirst());
         System.out.println(L.removeLast());
         System.out.println(L.isEmpty());
-        System.out.println(L.size);
+        System.out.println(L.size);*/
 
+        ArrayDeque<Integer> A = new ArrayDeque<>();
+        /*A.addFirst(1);
+        A.addLast(2);
+        A.addLast(3);
+        A.addFirst(4);*/
+        ArrayDeque<String> B = new ArrayDeque<>();
+        /*B.addFirst("1");
+        B.addLast("2");
+        B.addLast("3");
+        B.addFirst("4");*/
+        System.out.println(A.equals(B));
     }
 }

@@ -1,6 +1,8 @@
 package deque;
 
-public class LinkedListDeque<T> {
+import java.util.Iterator;
+
+public class LinkedListDeque<T> implements Iterable<T> {
     private Node sentinel;
     private int size;
 
@@ -20,7 +22,7 @@ public class LinkedListDeque<T> {
             next = nextNode;
         }
 
-        public T getRecursive(int index) {
+        public T getRecursiveNode(int index) {
             Node curNode = this;
             if (curNode == sentinel)
                 return null;
@@ -29,7 +31,7 @@ public class LinkedListDeque<T> {
                 return curNode.item;
 
             curNode = curNode.next;
-            return curNode.getRecursive(index - 1);
+            return curNode.getRecursiveNode(index - 1);
         }
 
     }
@@ -54,11 +56,7 @@ public class LinkedListDeque<T> {
     }
 
     public boolean isEmpty() {
-        if (sentinel.next == sentinel) {
-            return true;
-        }else {
-            return false;
-        }
+        return (sentinel.next == sentinel);
     }
 
     //*Returns the number of items in the deque.*/
@@ -127,7 +125,87 @@ public class LinkedListDeque<T> {
     }
 
     public T getRecursive(int index) {
-        return sentinel.next.getRecursive(index);
+        return sentinel.next.getRecursiveNode(index);
+    }
+
+    public Iterator<T> iterator(){
+        return new LinkedListDequeIterator();
+    }
+
+    private class LinkedListDequeIterator implements Iterator<T>{
+         Node position = sentinel.next;
+        public LinkedListDequeIterator(){
+            Node position;
+        }
+        public boolean hasNext(){
+            return position != sentinel;
+        }
+
+        public T next(){
+            T returnItem = position.item;
+            position = position.next;
+            return returnItem;
+        }
+    }
+
+    public boolean equals(Object o){
+        if (this == o) {
+            return true;
+        }
+
+        /* If we apply the instanceof operator with any variable that has null value, it returns false.*/
+        if (o instanceof ArrayDeque) {
+        }else {
+            return false;
+        }
+
+        ArrayDeque other = (ArrayDeque) o;
+        if (other.size() != this.size()) {
+            return false;
+        }
+        for (int i = 0; i <= size - 1; i += 1){
+            if (this.get(i) != other.get(i))
+                return false;
+        }
+        return true;
+    }
+
+    public static void main(String[]args){
+        /*LinkedListDeque<Integer> L = new LinkedListDeque<>();
+        L.addFirst(1);
+        L.addLast(2);
+        L.addLast(3);
+        L.addFirst(4);
+        System.out.println(L.isEmpty());
+
+        Iterator<Integer> seer = L.iterator();
+
+        while (seer.hasNext()){
+            System.out.println(seer.next());
+        }
+
+        for (Integer i : L){
+            System.out.println(i);
+        }
+
+        System.out.println(L.get(10));
+        L.printDeque();
+        System.out.println(L.removeFirst());
+        System.out.println(L.removeLast());
+        System.out.println(L.isEmpty());
+        System.out.println(L.size);*/
+
+        ArrayDeque<Integer> A = new ArrayDeque<>();
+        /*A.addFirst(1);
+        A.addLast(2);
+        A.addLast(3);
+        A.addFirst(4);*/
+        ArrayDeque<Integer> B = new ArrayDeque<>();
+        B.addFirst(1);
+        B.addLast(2);
+        B.addLast(3);
+        B.addFirst(4);
+        System.out.println(A.equals(B));
     }
 
 }
