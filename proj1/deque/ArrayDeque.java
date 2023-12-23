@@ -1,5 +1,4 @@
 package deque;
-import com.sun.xml.internal.xsom.impl.scd.Iterators;
 import java.util.Iterator;
 
 public class ArrayDeque<T> implements Iterable<T> {
@@ -128,6 +127,8 @@ public class ArrayDeque<T> implements Iterable<T> {
             return returnItem;
         }
     }
+
+
     /*Returns whether the parameter o is equal to the Deque*/
     public boolean equals(Object o){
         if (this == o) {
