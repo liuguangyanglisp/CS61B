@@ -152,7 +152,7 @@ public class LinkedListDeque<T> implements Iterable<T>, Deque<T> {
     private class LLDIterator implements Iterator<T> {
         private Node position;
 
-        public LLDIterator() {
+        private LLDIterator() {
             position = sentinel.next;
         }
 
@@ -168,6 +168,7 @@ public class LinkedListDeque<T> implements Iterable<T>, Deque<T> {
     }
 
     /*Returns whether the parameter o is equal to the Deque.*/
+
     public boolean equals(Object o) {
         if (this == o) {
             return true;
@@ -183,7 +184,7 @@ public class LinkedListDeque<T> implements Iterable<T>, Deque<T> {
             return false;
         }
         for (int i = 0; i <= size - 1; i += 1) {
-            if (this.get(i) != other.get(i)) {
+            if (!(this.get(i).equals(other.get(i)))) {
                 return false;
             }
         }
