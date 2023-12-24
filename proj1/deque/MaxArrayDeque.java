@@ -29,10 +29,10 @@ public class MaxArrayDeque<T> extends ArrayDeque<T> {
     }
 
     private static Comparator<Integer> getNumberComparator() {
-        return new numberComparator();
+        return new NumberComparator();
     }
 
-    private static class numberComparator implements Comparator<Integer> {
+    private static class NumberComparator implements Comparator<Integer> {
         public int compare(Integer a, Integer b) {
             return a - b;
         }
@@ -43,7 +43,7 @@ public class MaxArrayDeque<T> extends ArrayDeque<T> {
     }
 
     private static class StringComparator implements Comparator<String> {
-        public int compare(String a, String b){
+        public int compare(String a, String b) {
             return a.compareTo(b);
         }
     }

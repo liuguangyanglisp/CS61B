@@ -6,20 +6,17 @@ public class LinkedListDeque<T> implements Iterable<T>, Deque<T> {
     private int size;
 
     private class Node {
-        public Node prev;
-        public T item;
-        public Node next;
+        private Node prev;
+        private T item;
+        private Node next;
 
         /*Construct an empty Node.*/
-        public Node() {
-            Node prev;
-            T item;
-            Node next;
+        private Node() {
         }
 
-        /*Input: prevNode, a item, and nextNode.
-         * Construct a new Node,which points to prev and next Node.*/
-        public Node(Node prevNode, T aitem, Node nextNode) {
+        /*Input: prevNode, aitem, and nextNode.
+         * Create a new Node,which points to prev and next Node.*/
+        private Node(Node prevNode, T aitem, Node nextNode) {
             prev = prevNode;
             item = aitem;
             next = nextNode;
@@ -28,11 +25,13 @@ public class LinkedListDeque<T> implements Iterable<T>, Deque<T> {
         /*Return the index T item from the current Node recursively.*/
         public T getRecursiveNode(int index) {
             Node curNode = this;
-            if (curNode == sentinel)
+            if (curNode == sentinel) {
                 return null;
+            }
 
-            if (index == 0)
+            if (index == 0) {
                 return curNode.item;
+            }
 
             curNode = curNode.next;
             return curNode.getRecursiveNode(index - 1);
@@ -45,7 +44,7 @@ public class LinkedListDeque<T> implements Iterable<T>, Deque<T> {
         sentinel = new Node();
         sentinel.next = sentinel;
         sentinel.prev = sentinel;
-        int size = 0;
+        size = 0;
     }
 
     @Override
@@ -74,12 +73,13 @@ public class LinkedListDeque<T> implements Iterable<T>, Deque<T> {
     /*Print item of deque from first to last, separated by space.
     when it's done, print out a new line.*/
     public void printDeque() {
-        Node Deque = sentinel.next;
-        while (Deque != null) {
-            System.out.print(Deque.item + " ");
-            Deque = Deque.next;
-            if (Deque == sentinel)
+        Node theDeque = sentinel.next;
+        while (theDeque != null) {
+            System.out.print(theDeque.item + " ");
+            theDeque = theDeque.next;
+            if (theDeque == sentinel) {
                 break;
+            }
         }
         System.out.println();
     }
@@ -118,8 +118,9 @@ public class LinkedListDeque<T> implements Iterable<T>, Deque<T> {
     If no such item exists, returns null. Don't alter the deque!*/
     public T get(int index) {
         Node curNode = sentinel.next;
-        if (curNode == sentinel)
+        if (curNode == sentinel) {
             return null;
+        }
 
         int position = 0;
         while (curNode.next != sentinel && position < index) {
@@ -127,8 +128,9 @@ public class LinkedListDeque<T> implements Iterable<T>, Deque<T> {
             curNode = curNode.next;
         }
 
-        if (position != index)
+        if (position != index) {
             return null;
+        }
 
         return curNode.item;
     }
@@ -148,10 +150,10 @@ public class LinkedListDeque<T> implements Iterable<T>, Deque<T> {
      * hasNext return true if the position has an item.
      * next return the item of the position*/
     private class LLDIterator implements Iterator<T> {
-        Node position = sentinel.next;
+        private Node position;
 
         public LLDIterator() {
-            Node position;
+            position = sentinel.next;
         }
 
         public boolean hasNext() {
@@ -172,19 +174,19 @@ public class LinkedListDeque<T> implements Iterable<T>, Deque<T> {
         }
         /*Test whether the object is an instance of the specified type.
         If o is null, return false.*/
-        if (!(o instanceof LinkedListDeque)) {
+        if (!(o instanceof Deque)) {
             return false;
         }
 
-        LinkedListDeque other = (LinkedListDeque) o;
+        Deque other = (Deque) o;
         if (other.size() != this.size()) {
             return false;
         }
         for (int i = 0; i <= size - 1; i += 1) {
-            if (this.get(i) != other.get(i))
+            if (this.get(i) != other.get(i)) {
                 return false;
+            }
         }
         return true;
     }
-
 }

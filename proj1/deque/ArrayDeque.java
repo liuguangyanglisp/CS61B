@@ -130,8 +130,9 @@ public class ArrayDeque<T> implements Iterable<T>, Deque<T> {
      * return the index of array to get the item directly.*/
     private int indexTranslate(int index) {
         int newIndex = plusOne(nextFirst) + index;
-        if (newIndex > items.length - 1)
+        if (newIndex > items.length - 1) {
             newIndex = newIndex - items.length;
+        }
         return newIndex;
     }
 
@@ -145,9 +146,8 @@ public class ArrayDeque<T> implements Iterable<T>, Deque<T> {
      * hasNext return true if the position has an item.
      * next return the item of the position*/
     private class ADIterator implements Iterator<T> {
-        int position;
-
-        public ADIterator() {
+        private int position;
+        private ADIterator() {
             position = plusOne(nextFirst);
         }
 
@@ -170,17 +170,18 @@ public class ArrayDeque<T> implements Iterable<T>, Deque<T> {
 
         /*Test whether Object o is an instance of ArrayDeque.
         If o is not or null,  return false.*/
-        if (!(o instanceof ArrayDeque)) {
+        if (!(o instanceof Deque)) {
             return false;
         }
 
-        ArrayDeque other = (ArrayDeque) o;
-        if (other.size() != this.size() || other.items.length != this.items.length) {
+        Deque other = (Deque) o;
+        if (other.size() != this.size()) {
             return false;
         }
         for (int i = 0; i <= size - 1; i += 1) {
-            if (this.items[i] != other.items[i])
+            if (this.get(i) != other.get(i)) {
                 return false;
+            }
         }
         return true;
     }
@@ -188,7 +189,7 @@ public class ArrayDeque<T> implements Iterable<T>, Deque<T> {
     /*Resize Deque's size to n.
      *reorder items,start from index 0.
      *reset nextFirst and nextLast*/
-    public void reSize(int n) {
+    private void reSize(int n) {
         T[] tempItems = (T[]) new Object[n];
         for (int i = 0; i <= size - 1; i += 1) {
             tempItems[i] = get(i);
