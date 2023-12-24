@@ -1,6 +1,6 @@
 package deque;
 import java.util.Iterator;
-public class LinkedListDeque<T> implements Iterable<T> {
+public class LinkedListDeque<T> implements Deque<T> {
     private Node sentinel;
     private int size;
 
@@ -40,28 +40,28 @@ public class LinkedListDeque<T> implements Iterable<T> {
         sentinel.prev = sentinel;
         int size = 0;
     }
-
+    @Override
     public void addFirst(T item) {
         sentinel.next = new Node(sentinel, item, sentinel.next);
         sentinel.next.next.prev = sentinel.next;
         size += 1;
     }
-
+    @Override
     public void addLast(T item) {
         sentinel.prev = new Node(sentinel.prev, item, sentinel);
         sentinel.prev.prev.next = sentinel.prev;
         size += 1;
     }
-
+    /*@Override
     public boolean isEmpty() {
         return (sentinel.next == sentinel);
-    }
-
+    }*/
+    @Override
     //*Returns the number of items in the deque.*/
     public int size() {
         return size;
     }
-
+    @Override
     /*Prints the items in the deque from first to last, separated by a space.
     Once all the items have been printed, print out a new line.*/
     public void printDeque() {
@@ -74,7 +74,7 @@ public class LinkedListDeque<T> implements Iterable<T> {
         }
         System.out.println();
     }
-
+    @Override
     /*Removes and returns the item at the front of the deque.
     If no such item exists, returns null.*/
     public T removeFirst() {
@@ -87,7 +87,7 @@ public class LinkedListDeque<T> implements Iterable<T> {
         size -= 1;
         return tempFirstItem;
     }
-
+    @Override
     /*Removes and returns the item at the back of the deque.
      If no such item exists, returns null.*/
     public T removeLast() {
@@ -102,7 +102,7 @@ public class LinkedListDeque<T> implements Iterable<T> {
             return tempLastItem;
         }
     }
-
+    @Override
     /*Gets the item at the given index, where 0 is the front, 1 is the next item, and so forth.
     If no such item exists, returns null. Must not alter the deque!*/
     public T get(int index) {

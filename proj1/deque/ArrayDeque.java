@@ -1,7 +1,7 @@
 package deque;
 import java.util.Iterator;
 
-public class ArrayDeque<T> implements Iterable<T> {
+public class ArrayDeque<T> implements Deque<T> {
     /** Creates an empty list. */
     private T[] items;
     private int size;
@@ -32,7 +32,7 @@ public class ArrayDeque<T> implements Iterable<T> {
         nextFirst = 0;
         nextLast = 1;
     }
-
+    @Override
     public void addFirst(T x) {
         if (size == items.length){
             reSize(size * 2);
@@ -42,7 +42,7 @@ public class ArrayDeque<T> implements Iterable<T> {
         nextFirst = minusOne(nextFirst);
 
     }
-
+    @Override
     /** Inserts X into the back of the list. */
     public void addLast(T x) {
         if (size == items.length){
@@ -52,15 +52,15 @@ public class ArrayDeque<T> implements Iterable<T> {
         size += 1;
         nextLast = plusOne(nextLast);
     }
-
+    /*@Override
     public boolean isEmpty(){
         return size == 0;
-    }
-
+    }*/
+    @Override
     public int size(){
         return size;
     }
-
+    @Override
     public void printDeque(){
         int first = plusOne(nextFirst);
         while (first != nextLast){
@@ -69,7 +69,7 @@ public class ArrayDeque<T> implements Iterable<T> {
         }
         System.out.println();
     }
-
+    @Override
     public T removeFirst(){
         double usageRate = (size - 1) / (items.length * 1.0);
         if ( items.length >= 16 && usageRate < 0.25){
@@ -81,7 +81,7 @@ public class ArrayDeque<T> implements Iterable<T> {
         size -= 1;
         return tempFirstItem;
     }
-
+    @Override
     /** Deletes item from back of the list and
      * returns deleted item. */
     public T removeLast() {
@@ -95,7 +95,7 @@ public class ArrayDeque<T> implements Iterable<T> {
         size -= 1;
         return tempLastItem;
     }
-
+    @Override
     public T get(int index){
         if (index >= size || index < 0){
             return null;
@@ -135,7 +135,7 @@ public class ArrayDeque<T> implements Iterable<T> {
             return true;
         }
 
-        /* If we apply the instanceof operator with any variable that has null value, it returns false.*/
+        //* If we apply the instanceof operator with any variable that has null value, it returns false.*//*
         if (o instanceof ArrayDeque) {
         }else {
             return false;
