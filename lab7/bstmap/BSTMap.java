@@ -200,10 +200,11 @@ public class BSTMap<K extends Comparable<K>, V> implements Map61B<K, V> {
     }
 
     private BSTNode rotateLeft (BSTNode n) {
-        if (n != null && n.right != null) return n;
-
+        if (n == null || n.right == null) return n;
             BSTNode parent = findParent(this.node, n);
             BSTNode newRoot = n.right;
+            Boolean newRootColor = newRoot.isred;
+            boolean nColor = n.isred;
             n.right = newRoot.left;
             newRoot.left = n;
             n.size = 1 + size(n.left) + size(n.right);
@@ -224,6 +225,8 @@ public class BSTMap<K extends Comparable<K>, V> implements Map61B<K, V> {
                 }
                 parent.size = 1 + size(parent.left) + size(parent.right);
             }
+            newRoot.isred = nColor;
+            n.isred = newRootColor;
             return newRoot;
         }
 
@@ -232,6 +235,8 @@ public class BSTMap<K extends Comparable<K>, V> implements Map61B<K, V> {
 
             BSTNode parent = findParent(this.node, n);
             BSTNode newRoot = n.left;
+            Boolean newRootColor = newRoot.isred;
+            boolean nColor = n.isred;
             n.left = newRoot.right;
             newRoot.right = n;
             n.size = 1 + size(n.left) + size(n.right);
@@ -252,12 +257,14 @@ public class BSTMap<K extends Comparable<K>, V> implements Map61B<K, V> {
                 }
                 parent.size = 1 + size(parent.left) + size(parent.right);
             }
+        newRoot.isred = nColor;
+        n.isred = newRootColor;
         return newRoot;
         }
 
     private void flipColor (BSTNode n) {
         if (n != node) {
-            node.isred = true;
+            n.isred = true;
         }
         n.left.isred = false;
         n.right.isred = false;
@@ -275,7 +282,6 @@ public class BSTMap<K extends Comparable<K>, V> implements Map61B<K, V> {
         m.put(4,4);
         m.put(5,5);
         m.put(6,6);
-        m.rotateLeft(m.getNode(m.node,3));
         /*m.put("B","B");
         m.put("A","A");
         m.put("E","E");
@@ -283,6 +289,5 @@ public class BSTMap<K extends Comparable<K>, V> implements Map61B<K, V> {
         m.put("Z","Z");
         m.put("G","G");*/
         m.printInOrder();
-
     }
 }
