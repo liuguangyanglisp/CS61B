@@ -42,7 +42,7 @@ public class InsertRandomSpeedTest {
 
     /** Returns time needed to put N random strings of length L into the
       * Map61B 61bMap. */
-    public static double insertRandom(Map61B<String, Integer> map61B, int N, int L) {
+    public static double insertRandom(Map61B<String, Integer> map61B, int N, int L)  {
         Stopwatch sw = new Stopwatch();
         String s = "cat";
         for (int i = 0; i < N; i++) {
