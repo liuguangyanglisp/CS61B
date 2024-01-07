@@ -1,5 +1,6 @@
 package bstmap;
 
+import com.google.common.base.Strings;
 import org.w3c.dom.Node;
 
 import java.security.Key;
@@ -23,10 +24,6 @@ public class BSTMap<K extends Comparable<K>, V> implements Map61B<K, V> {
     public BSTMap() {
 
     }
-    public BSTMap(K k, V v) {
-        node = new BSTNode(k,v);
-    }
-
 
     @Override
     /** Removes all of the mappings from this map. */
@@ -98,9 +95,6 @@ public class BSTMap<K extends Comparable<K>, V> implements Map61B<K, V> {
         if (key == null) {
             throw new IllegalArgumentException("calls put() with a null key");
         }
-        /*if (value == null) {
-            return;
-        }*/
         node = put(node,key,value);
     }
 
@@ -125,21 +119,32 @@ public class BSTMap<K extends Comparable<K>, V> implements Map61B<K, V> {
     /* Returns a Set view of the keys contained in this map. Not required for Lab 7.
      * If you don't implement this, throw an UnsupportedOperationException. */
     public Set<K> keySet() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public V remove(K key) {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public V remove(K key, V value) {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public Iterator<K> iterator() {
-        return null;
+        throw new UnsupportedOperationException();
+    }
+
+    public void printInOrder() {
+        inorderPrint(this.node);
+    }
+
+    private void inorderPrint(BSTNode n) {
+        if (n == null) return;
+        inorderPrint(n.left);
+        System.out.print(n.key + " ");
+        inorderPrint(n.right);
     }
 }
