@@ -8,12 +8,15 @@ import java.util.*;
 
 public class BSTMap<K extends Comparable<K>, V> implements Map61B<K, V> {
     private BSTNode node;
+    private static int colorSet;
+
     private class BSTNode {
         private K key;
         private V value;
         private BSTNode left, right;
         private int size;
         private boolean isred;
+
         private BSTNode(K k, V v) {
             this.key = k;
             this.value = v;
@@ -35,19 +38,19 @@ public class BSTMap<K extends Comparable<K>, V> implements Map61B<K, V> {
     @Override
     /* Returns true if this map contains a mapping for the specified key. */
     public boolean containsKey(K key) {
-        return getKey(node,key) == key;
+        return getKey(node, key) == key;
     }
 
     private K getKey(BSTNode n, K key) {
         if (key == null) {
-            throw new IllegalArgumentException("calls get() with a null key");
+            throw new IllegalArgumentException("calls getKey(n,key) with a null key");
         }
         if (n == null) {
             return null;
         }
         int cmp = key.compareTo(n.key);
         if (cmp > 0) {
-            return getKey(n.right,key);
+            return getKey(n.right, key);
         }
         if (cmp < 0) {
             return getKey(n.left, key);
@@ -60,7 +63,7 @@ public class BSTMap<K extends Comparable<K>, V> implements Map61B<K, V> {
      * map contains no mapping for the key.
      */
     public V get(K key) {
-        return getValue(node,key);
+        return getValue(node, key);
     }
 
     private V getValue(BSTNode n, K key) {
@@ -83,11 +86,15 @@ public class BSTMap<K extends Comparable<K>, V> implements Map61B<K, V> {
         return size(node);
     }
 
-    private int size (BSTNode n) {
+    private int size(BSTNode n) {
         if (n == null) {
             return 0;
         }
         return n.size;
+    }
+
+    private int updateSize(BSTNode n) {
+        return (1 + size(n.left) + size(n.right));
     }
 
     @Override
@@ -96,15 +103,16 @@ public class BSTMap<K extends Comparable<K>, V> implements Map61B<K, V> {
         if (key == null) {
             throw new IllegalArgumentException("calls put() with a null key");
         }
-        node = put(node,key,value);
-        if (node.isred) {
-            node.isred = false;
-        }
+        node = put(node, key, value);
+        node.isred = false;
     }
 
-    private BSTNode put(BSTNode n,K key, V value) {
+    private BSTNode put(BSTNode n, K key, V value) {
         if (n == null) {
-            return new BSTNode(key,value);
+            return new BSTNode(key, value);
+        }
+        if (value == null) {
+            throw new IllegalArgumentException();
         }
         int cmp = key.compareTo(n.key);
         if (cmp < 0) {
@@ -116,16 +124,24 @@ public class BSTMap<K extends Comparable<K>, V> implements Map61B<K, V> {
         if (cmp == 0) {
             n.value = value;
         }
+        n.size = updateSize(n);
 
-        n.size = 1 + size(n.left) + size(n.right);
+        // balance the tree
+        // move red node to left. if right is red, and left is not red,rotate n to left
         if (isRed(n.right) && !isRed(n.left)) {
-           n =  rotateLeft(n);
+            n = rotateLeft(n);
         }
-        if (isRed(n.left) && isRed(n.left.left)) {
-            n = rotateRight(n);
-        }
+
+        // if both child are red, exchange parent and child's color
         if (isRed(n.left) && isRed(n.right)) {
             flipColor(n);
+        }
+
+        // we have already exclude the circumstance above (left red, or both red).
+        // we accpet one left red child.
+        // but if n has 2 conneted left red child, rotate n to right;
+        if (isRed(n.left) && isRed(n.left.left)) {
+            n = rotateRight(n);
         }
         return n;
     }
@@ -155,6 +171,7 @@ public class BSTMap<K extends Comparable<K>, V> implements Map61B<K, V> {
 
     public void printInOrder() {
         inorderPrint(this.node);
+        System.out.println();
     }
 
     private void inorderPrint(BSTNode n) {
@@ -163,131 +180,78 @@ public class BSTMap<K extends Comparable<K>, V> implements Map61B<K, V> {
         System.out.print(n.key + " ");
         inorderPrint(n.right);
     }
-
-    private BSTNode getNode (BSTNode n, K k) {
-        if (n == null) return null;
-        if (k == null) {
-            throw new IllegalArgumentException();
-        }
-        int cmp = k.compareTo(n.key);
-        if (cmp > 0) {
-            return getNode(n.right, k);
-        }
-        if (cmp < 0) {
-            return getNode(n.left, k);
-        }
-        return n;
-    }
-
-
-
-
-    private BSTNode findParent (BSTNode upNode,BSTNode downNode) {
-        if (upNode == null) return null;
-        if (downNode == null) {
-            throw new IllegalArgumentException();
-        }
-        if (upNode.right == downNode || upNode.left == downNode) return upNode;
-        int cmp = downNode.key.compareTo(upNode.key);
-        if (cmp > 0) {
-            return findParent(upNode.right, downNode);
-        }
-        if (cmp < 0) {
-            return findParent(upNode.left, downNode);
-        }
-        return null;
-
-    }
-
-    private BSTNode rotateLeft (BSTNode n) {
+    private BSTNode rotateLeft(BSTNode n) {
         if (n == null || n.right == null) return n;
-            BSTNode parent = findParent(this.node, n);
-            BSTNode newRoot = n.right;
-            Boolean newRootColor = newRoot.isred;
-            boolean nColor = n.isred;
-            n.right = newRoot.left;
-            newRoot.left = n;
-            n.size = 1 + size(n.left) + size(n.right);
-            newRoot.size = 1 + size(newRoot.left) + size(newRoot.right);
-
-            if (parent == null) {
-                node = newRoot;
-            } else {
-                int cmp = newRoot.key.compareTo(parent.key);
-                if (cmp > 0) {
-                    parent.right = newRoot;
-                }
-                if (cmp < 0) {
-                    parent.left = newRoot;
-                }
-                if (cmp == 0) {
-                    throw new RuntimeException("parent node and child node have same Key");
-                }
-                parent.size = 1 + size(parent.left) + size(parent.right);
-            }
-            newRoot.isred = nColor;
-            n.isred = newRootColor;
-            return newRoot;
-        }
-
-    private BSTNode rotateRight (BSTNode n) {
-        if (n == null || n.left == null) return n;
-
-            BSTNode parent = findParent(this.node, n);
-            BSTNode newRoot = n.left;
-            Boolean newRootColor = newRoot.isred;
-            boolean nColor = n.isred;
-            n.left = newRoot.right;
-            newRoot.right = n;
-            n.size = 1 + size(n.left) + size(n.right);
-            newRoot.size = 1 + size(newRoot.left) + size(newRoot.right);
-
-            if (parent == null) {
-                node = newRoot;
-            } else {
-                int cmp = newRoot.key.compareTo(parent.key);
-                if (cmp > 0) {
-                    parent.right = newRoot;
-                }
-                if (cmp < 0) {
-                    parent.left = newRoot;
-                }
-                if (cmp == 0) {
-                    throw new RuntimeException("parent node and child node have same Key");
-                }
-                parent.size = 1 + size(parent.left) + size(parent.right);
-            }
-        newRoot.isred = nColor;
-        n.isred = newRootColor;
+        //rotate
+        BSTNode newRoot = n.right;
+        n.right = newRoot.left;
+        newRoot.left = n;
+        // update size and color
+        n.size = updateSize(n);
+        newRoot.size = updateSize(newRoot);
+        flipColor(newRoot, n);
+        //return
         return newRoot;
-        }
-
-    private void flipColor (BSTNode n) {
-        if (n != node) {
-            n.isred = true;
-        }
-        n.left.isred = false;
-        n.right.isred = false;
     }
 
-    private boolean isRed (BSTNode n) {
+    private BSTNode rotateRight(BSTNode n) {
+        if (n == null || n.left == null) return n;
+        //rotate
+        BSTNode newRoot = n.left;
+        n.left = newRoot.right;
+        newRoot.right = n;
+        // update size and color
+        n.size = updateSize(n);
+        newRoot.size = updateSize(newRoot);
+        flipColor(newRoot, n);
+        //return
+        return newRoot;
+    }
+
+    /*Exchange color between parent and child.
+     * when both child are red, only input parent
+     * when rotate, input newparent and the child (who is parent befoe)*/
+    private void flipColor(BSTNode parent, BSTNode... childNode) {
+        // exchange color when both child are red
+        if (childNode.length == 0) {
+            parent.isred = true;
+            parent.left.isred = false;
+            parent.right.isred = false;
+        }
+        // exchange color when rotate
+        if (childNode.length == 1) {
+            Boolean parentColor = parent.isred;
+            parent.isred = childNode[0].isred;
+            childNode[0].isred = parentColor;
+        }
+    }
+
+    private boolean isRed(BSTNode n) {
         if (n == null) return false;
         return n.isred;
     }
-    public static void main(String[] args) {
-        BSTMap m = new BSTMap();
-        m.put(1,1);
-        m.put(2,2);
-        m.put(3,3);
-        m.put(4,4);
-        m.put(5,5);
-        m.put(6,6);
-        /*m.put("B","B");
-        m.put("A","A");
-        m.put("E","E");
-        m.put("S","S");
-        m.put("Z","Z");
-        m.put("G","G");*/
-        m.printInOrder();
+
+    public void printpreOrder() {
+        preorderPrint(this.node);
+        System.out.println();
+    }
+
+    private void preorderPrint(BSTNode n) {
+        if (n == null) return;
+        System.out.print(n.key + " ");
+        preorderPrint(n.left);
+        preorderPrint(n.right);
+    }
+
+    public void printPostorder() {
+        postorderPrint(this.node);
+        System.out.println();
+    }
+
+    private void postorderPrint(BSTNode n) {
+        if (n == null) return;
+        postorderPrint(n.left);
+        postorderPrint(n.right);
+        System.out.print(n.key + " ");
     }
 }
