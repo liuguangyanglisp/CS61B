@@ -1,7 +1,4 @@
 package hashmap;
-
-
-import java.lang.reflect.Array;
 import java.util.*;
 
 /**
@@ -11,7 +8,7 @@ import java.util.*;
  *  Assumes null keys will never be inserted, and does not resize down upon remove().
  *  @author YOUR NAME HERE
  */
-public class MyHashMap<K, V> implements Map61B<K, V>, Iterable<K>{
+public class MyHashMap<K, V> implements Map61B<K, V> {
 
     /**
      * Protected helper class to store key/value pairs
