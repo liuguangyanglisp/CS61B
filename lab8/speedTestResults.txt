@@ -1,0 +1,44 @@
+*Strings of each length: 10
+1.InsertRandomSpeedTest
+# Strings : 1000000
+hashmap.ULLMap: --Stack Overflow -- couldn't add 100,000 strings.
+class hashmap.MyHashMap: 0.39 sec
+Java's Built-in HashMap: 0.23 sec
+
+# Strings: 100000000
+class hashmap.MyHashMap: 5.79 sec
+Java's Built-in HashMap: 2.97 sec
+
+2.InsertOrderSpeedTest
+
+# Strings : 1,000,000
+hashmap.ULLMap: --Stack Overflow -- couldn't add 1000000 strings.
+class hashmap.MyHashMap: 0.34 sec
+Java's Built-in HashMap: 0.24 sec
+
+# Strings: 100000000
+class hashmap.MyHashMap: 3.59 sec
+Java's Built-in HashMap: 1.65 sec
+
+3.BucketsSpeedTest
+3.1Enter # strings to insert into each map: 100000
+class hashmap.MyHashMapALBuckets: 0.07 sec
+class hashmap.MyHashMapLLBuckets: 0.06 sec
+class hashmap.MyHashMapTSBuckets: 0.07 sec
+class hashmap.MyHashMapHSBuckets: 0.06 sec
+class hashmap.MyHashMapPQBuckets: 0.04 sec
+
+3.2Enter # strings to insert into each map: 1000000
+class hashmap.MyHashMapALBuckets: 0.43 sec
+class hashmap.MyHashMapLLBuckets: 0.48 sec
+class hashmap.MyHashMapTSBuckets: 0.49 sec
+class hashmap.MyHashMapHSBuckets: 0.69 sec
+class hashmap.MyHashMapPQBuckets: 0.48 sec
+
+3.3Enter # strings to insert into each map: 10000000
+class hashmap.MyHashMapALBuckets: 5.90 sec
+class hashmap.MyHashMapLLBuckets: 7.23 sec
+class hashmap.MyHashMapTSBuckets: 7.94 sec
+class hashmap.MyHashMapHSBuckets: 11.56 sec
+class hashmap.MyHashMapPQBuckets: 6.23 sec
+
