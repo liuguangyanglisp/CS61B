@@ -106,7 +106,7 @@ public class Commit implements Serializable {
         //serialize commit and generate SHA1
         byte[] serializeCommit = serialize(this);
         String commitID = sha1(serializeCommit);
-        String shortCommitID = commitID.substring(0,5);
+        String shortCommitID = commitID.substring(0,6);
 
         //use SHA1 to create a file in Commit_Dir,and write the commit into the file.
         File storeDir = join(Commit_Dir,shortCommitID);
@@ -120,7 +120,7 @@ public class Commit implements Serializable {
 
     /*Return a Commit object,take an commitID as argument. */
     public static Commit getCommit (String commitID) {
-        String shortID = commitID.substring(0,5);
+        String shortID = commitID.substring(0,6);
         File commit = join(Commit_Dir,shortID,commitID);
         return readObject(commit,Commit.class);
     }
@@ -160,10 +160,10 @@ public class Commit implements Serializable {
         return fileMap;
     }
 
-    /**Given a short commit ID, return full commit ID*/
-    public static String getlongCommitID (String shortCommitID) {
-        File shortCommitIDfile = join(Commit_Dir,shortCommitID);
-        List<String> longCommitID = plainFilenamesIn(shortCommitIDfile);
-        return longCommitID.getFirst();
+    /**Given a directory whose file named after short SHA1 , return long SHA1*/
+    public static String getlongSHA1 (File directory,String shortSHA1) {
+        File shortSHA1file = join(directory,shortSHA1);
+        List<String> longSHA1 = plainFilenamesIn(shortSHA1file);
+        return longSHA1.getFirst();
     }
 }

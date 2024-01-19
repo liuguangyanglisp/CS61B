@@ -163,7 +163,7 @@ public class Repository {
         }
         byte[] fileContent = readContents(CWDfile);
         String blobID = sha1(fileContent);
-        String shortBlobID = blobID.substring(0,5);
+        String shortBlobID = blobID.substring(0,6);
 
         File stageFile = join(stageArea,fileName);
         writeContents(stageFile,blobID);
@@ -196,9 +196,9 @@ public class Repository {
 
     /**Print all the commits ever made.*/
     public static void globallog () {
-        List<String> commitFileNames = plainFilenamesIn(Commit_Dir);
+        List<String> commitFileNames = FilenamesIn(Commit_Dir);
         for (String commitFileName : commitFileNames) {
-            String longCommitID = getlongCommitID(commitFileName);
+            String longCommitID = getlongSHA1(Commit_Dir,commitFileName);
             printlog(longCommitID);
         }
     }
@@ -209,10 +209,10 @@ public class Repository {
             return;
         }
         String message = args[1];
-        List<String> commitFileNames = plainFilenamesIn(Commit_Dir);
+        List<String> commitFileNames = FilenamesIn(Commit_Dir);
         int findTimes = 0;
         for (String commitFileName : commitFileNames) {
-            String longCommitID = getlongCommitID(commitFileName);
+            String longCommitID = getlongSHA1(Commit_Dir,commitFileName);
             String commitMessage = Commit.getCommit(longCommitID).getMessage();
             if (commitMessage.equals(message)) {
                 System.out.println(longCommitID);
@@ -330,12 +330,6 @@ public class Repository {
 
     }
 
-    private static void printFileInOrder(File directory) {
-        List<String> fileNames = plainFilenamesIn(directory);
-        for (String fileName : fileNames) {
-        }
-    }
-
     /**Given a fileName(not SHA1), check if it's tracked in current commit*/
     private static boolean isTracked (String fileName) {
         return Head().getBlob(fileName) != null;
@@ -366,10 +360,16 @@ public class Repository {
     public static void gitletCheckout(String[] args) {
         int argLength = args.length;
         switch (argLength) {
+            case 1:
+                throw new GitletException("\njava gitlet.Main checkout -- [file name]" +
+                        "\njava gitlet.Main checkout [commit id] -- [file name]" +
+                        "\njava gitlet.Main checkout [branch name]\n");
             case 3:
                 checkoutFileFromCommit(Head(),args[2]);
                 break;
             case 4:
+                System.out.println(args[1]);
+                System.out.println(args[3]);
                 checkoutFileFromID(args[1],args[3]);
                 break;
             case 2:
@@ -382,7 +382,7 @@ public class Repository {
         if (shortCommitID.length() != 6) {
             throw new GitletException("abbreviate commits with a unique 6 digits prefix.");
         }
-        String longCommitID = getlongCommitID(shortCommitID);
+        String longCommitID = getlongSHA1(Commit_Dir,shortCommitID);
         Commit commit = getCommit(longCommitID);
         if (commit == null) {
             throw new GitletException("No commit with that id exists.");
@@ -395,7 +395,8 @@ public class Repository {
         if (blobID == null) {
             throw new GitletException("File does not exist in that commit.");
         }
-        byte[] blobContent = readContents(join(Blobs_Dir,blobID));
+        String shortBlobID = blobID.substring(0,6);
+        byte[] blobContent = readContents(join(Blobs_Dir,shortBlobID,blobID));
         File CWDfile = join(CWD,fileName);
         writeContents(CWDfile,blobContent);
     }
@@ -417,13 +418,13 @@ public class Repository {
                     throw new GitletException("There is an untracked file in the way; delete it, or add and commit it first.");
                 }
             }
+            for (String file : branchHeadFiles) {
+                checkoutFileFromCommit(branchHead,file);
+            }
             for (String file : CWDfiles) {
                 if (isTracked(file) && !branchHeadFiles.contains(file)) {
                     join(CWD,file).delete();
                 }
-            }
-            for (String file : branchHeadFiles) {
-                checkoutFileFromCommit(branchHead,file);
             }
 
             clear(AddStageArea);
@@ -447,6 +448,19 @@ public class Repository {
             }
         } else {
             throw new GitletException("Error: can only clear add or remove stageArea.");
+        }
+    }
+
+    /**Returns a list of the names of all files in the directory DIR, in
+     *  lexicographic order as Java Strings.  Returns null if DIR does
+     *  not denote a directory. */
+    public static List<String> FilenamesIn(File dir) {
+        String[] files = dir.list();
+        if (files == null) {
+            return null;
+        } else {
+            Arrays.sort(files);
+            return Arrays.asList(files);
         }
     }
 }
