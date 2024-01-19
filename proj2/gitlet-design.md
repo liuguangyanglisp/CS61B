@@ -1,6 +1,6 @@
 # Gitlet Design Document
 
-**Name**:
+**Name**:LiuGuangYang
 
 ## Classes and Data Structures
 
