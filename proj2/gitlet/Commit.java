@@ -164,7 +164,11 @@ public class Commit implements Serializable {
     public static String getlongSHA1 (File directory,String shortSHA1) {
         File shortSHA1file = join(directory,shortSHA1);
         List<String> longSHA1 = plainFilenamesIn(shortSHA1file);
-        return longSHA1.getFirst();
+        if (longSHA1 == null) {
+            throw new GitletException("Error: can't find longSHA1");
+        } else {
+            return longSHA1.getFirst();
+        }
     }
 
     public static String splitPoint (String givenBranchName) {
