@@ -2,7 +2,6 @@ package gitlet;
 
 // TODO: any imports you need here
 import java.io.File;
-import java.io.IOException;
 import java.io.Serializable;
 import java.util.*;
 import static gitlet.Repository.*;
@@ -59,27 +58,25 @@ public class Commit implements Serializable {
     //TODO: runtime
 
     public Commit(String amessage) {
-        if (amessage == null) {
+        if (amessage.isBlank()) {
             throw new GitletException("Please enter a commit message.");
         }
         message = amessage;
         time = new Date();
         parent = headCommitID();
         fileMap = getCommit(parent).fileMap;
-        updateNewCommit();
+        trackStage();
     }
 
-    /**update the new commit, track or remove files from it.
+    /**track or remove files from this commit according to stageArea.
      * empty add-StageArea and remove-StageArea*/
-    private  void updateNewCommit() {
+    private  void trackStage() {
         List<String> addStageFileNames = plainFilenamesIn(AddStageArea);
         List<String> removeStageFileNames = plainFilenamesIn(RemoveStageArea);
         if (addStageFileNames.isEmpty() && removeStageFileNames.isEmpty()) {
-            System.out.println("Null");
             throw new GitletException("No changes added to the commit.");
         }
 
-        if (!(addStageFileNames == null)) {
             for (String fileName : addStageFileNames) {
                 File stageFile = join(AddStageArea, fileName);
                 String blobId = readContentsAsString(stageFile);
@@ -89,20 +86,18 @@ public class Commit implements Serializable {
                 fileMap.put(fileName, blobId);
                 stageFile.delete();
             }
-        }
 
-        if (!(removeStageFileNames == null)) {
+
             for (String fileName : removeStageFileNames) {
-                File stageFile = join(Repository.RemoveStageArea,fileName);
+                File stageFile = join(RemoveStageArea,fileName);
                 String blobId = readContentsAsString(stageFile);
                 fileMap.remove(fileName);
                 stageFile.delete();
             }
         }
-    }
 
     /**Save this commit into file, and let it be HEAD.*/
-    public void saveCommit() throws IOException {
+    public void saveCommit() {
         //serialize commit and generate SHA1
         byte[] serializeCommit = serialize(this);
         String commitID = sha1(serializeCommit);
@@ -149,10 +144,9 @@ public class Commit implements Serializable {
     public Set<String> fileNameSet() {
         if (fileMap == null) {
             return null;
+        } else {
+            return fileMap.keySet();
         }
-        Set<String> keySet = fileMap.keySet();
-        TreeSet<String> sortedKeys = new TreeSet<>(keySet);
-        return sortedKeys;
     }
 
     /**Return Files(Map) of this commit*/
