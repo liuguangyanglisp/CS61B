@@ -120,7 +120,7 @@ public class Commit implements Serializable {
     public static Commit getCommit (String commitID) {
         String shortID = commitID.substring(0,6);
         File commitFile = join(Commit_Dir,shortID,commitID);
-        if (!commitFile.isFile()) {
+        if (!commitFile.exists()) {
             return null;
         } else {
             Commit commit = readObject(commitFile,Commit.class);
@@ -167,7 +167,8 @@ public class Commit implements Serializable {
 
     /**Given a short commitID(sha1 6digits prefix), return a long commitID (sha1)*/
     public static String getlongCommitID (String shortCommitID) {
-        File shortCommitIDfile = join(Commit_Dir,shortCommitID);
+        String sixDigitsID = shortCommitID.substring(0, 6);
+        File shortCommitIDfile = join(Commit_Dir,sixDigitsID);
         if (shortCommitIDfile.exists()) {
             List<String> longCommitID = plainFilenamesIn(shortCommitIDfile);
             return longCommitID.get(0);

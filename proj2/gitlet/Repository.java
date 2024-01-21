@@ -379,16 +379,13 @@ public class Repository {
     }
 
     private static void checkoutFileFromID (String commitID, String fileName) {
-        String longCommitID = commitID;
-        if (commitID.length() != 40){
-            longCommitID = getlongCommitID(commitID);
-            if (longCommitID == null) {
-                System.out.println("No commit with that id exists.");
-                return;
-            }
+        if (commitID.length() >= 6) {
+            String longCommitID = getlongCommitID(commitID);
+            Commit commit = getCommit(longCommitID);
+            checkoutFileFromCommit(commit,fileName);
+        } else {
+            System.out.println("No commit with that id exists.");
         }
-        Commit commit = getCommit(longCommitID);
-        checkoutFileFromCommit(commit,fileName);
     }
 
     private static void checkoutFileFromCommit (Commit commit, String fileName) {
@@ -422,9 +419,10 @@ public class Repository {
     private static void checkoutAllfilesFromID (String longCommitID) {
         Commit branchHead = getCommit(longCommitID);
         if (branchHead == null) {
+            System.err.println("No commit with that id exists.");
             return;
         }
-        if (branchHead.equals(Head())) {
+        if (longCommitID.equals(headCommitID())) {
             System.err.println("No need to checkout the current branch.");
             return;
         }
@@ -496,15 +494,14 @@ public class Repository {
             return;
         }
         String commitID = args[1];
-        if (commitID.length() != 40){
-            commitID = getlongCommitID(commitID);
-            if (commitID == null) {
-                System.err.println("No commit with that id exists.");
-                return;
-            }
+
+        if (commitID.length() >= 6) {
+            String longCommitID = getlongCommitID(commitID);
+            checkoutAllfilesFromID(longCommitID);
+            writeContents(activeBranch(),longCommitID);
+        }else {
+            System.err.println("No commit with that id exists.");
         }
-        checkoutAllfilesFromID(commitID);
-        writeContents(activeBranch(),commitID);
     }
 
     public static void gitletmerge (String[] args) {
