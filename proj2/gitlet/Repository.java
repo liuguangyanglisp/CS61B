@@ -338,6 +338,9 @@ public class Repository {
 
     /**Given a fileName(not SHA1), check if it's tracked in current commit*/
     private static boolean isTracked (String fileName) {
+        if (Head() == null) {
+            return false;
+        }
         return Head().getBlob(fileName) != null;
     }
 
@@ -379,10 +382,14 @@ public class Repository {
         String longCommitID = commitID;
         if (commitID.length() != 40){
             longCommitID = getlongCommitID(commitID);
-            System.out.println("No commit with that id exists.");
             if (longCommitID == null) {
+                System.out.println("No commit with that id exists.");
                 return;
             }
+        }
+        if (longCommitID.equals(headCommitID())) {
+            System.err.println("No need to checkout the current branch.");
+            return;
         }
         Commit commit = getCommit(longCommitID);
         checkoutFileFromCommit(commit,fileName);
