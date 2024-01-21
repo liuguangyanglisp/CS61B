@@ -166,14 +166,14 @@ public class Commit implements Serializable {
         return fileMap;
     }
 
-    /**Given a directory whose file named after short SHA1 , return long SHA1*/
-    public static String getlongSHA1 (File directory,String shortSHA1) {
-        File shortSHA1file = join(directory,shortSHA1);
-        List<String> longSHA1 = plainFilenamesIn(shortSHA1file);
-        if (longSHA1.isEmpty()) {
-            throw new GitletException("Error: can't find longSHA1");
+    /**Given a short commitID(sha1 6digits prefix), return a long commitID (sha1)*/
+    public static String getlongCommitID (String shortCommitID) {
+        File shortCommitIDfile = join(Commit_Dir,shortCommitID);
+        if (shortCommitIDfile.exists()) {
+            List<String> longCommitID = plainFilenamesIn(shortCommitIDfile);
+            return longCommitID.get(0);
         } else {
-            return longSHA1.get(0);
+            return null;
         }
     }
 

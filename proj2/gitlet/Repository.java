@@ -202,7 +202,7 @@ public class Repository {
     public static void globallog () {
         List<String> commitFileNames = FilenamesIn(Commit_Dir);
         for (String commitFileName : commitFileNames) {
-            String longCommitID = getlongSHA1(Commit_Dir,commitFileName);
+            String longCommitID = getlongCommitID(commitFileName);
             printlog(longCommitID);
         }
     }
@@ -216,7 +216,7 @@ public class Repository {
         List<String> commitFileNames = FilenamesIn(Commit_Dir);
         int findTimes = 0;
         for (String commitFileName : commitFileNames) {
-            String longCommitID = getlongSHA1(Commit_Dir,commitFileName);
+            String longCommitID = getlongCommitID(commitFileName);
             String commitMessage = Commit.getCommit(longCommitID).getMessage();
             if (commitMessage.equals(message)) {
                 System.out.println(longCommitID);
@@ -371,22 +371,19 @@ public class Repository {
         } else if (args.length == 2) {
             checkoutbranch(args[1]);
         } else {
-            System.err.println(
-                    "\nplease provide correct format:" +
-                    "\njava gitlet.Main checkout -- [file name]" +
-                    "\njava gitlet.Main checkout [commit id] -- [file name]" +
-                    "\njava gitlet.Main checkout [branch name]");
+            System.err.println("Incorrect operands.");
         }
     }
 
     private static void checkoutFileFromID (String commitID, String fileName) {
         String longCommitID = commitID;
-        if (commitID.length() == 6) {
-            longCommitID = getlongSHA1(Commit_Dir,commitID);
-        } else if (commitID.length() != 40){
-            return;
+        if (commitID.length() != 40){
+            longCommitID = getlongCommitID(commitID);
+            System.out.println("No commit with that id exists.");
+            if (longCommitID == null) {
+                return;
+            }
         }
-
         Commit commit = getCommit(longCommitID);
         checkoutFileFromCommit(commit,fileName);
     }
@@ -491,14 +488,16 @@ public class Repository {
 
     public static void gitletreset (String[] args) {
         if (args.length != 2) {
-            System.err.println("provide a commitID");
+            System.err.println("Incorrect operands.");
             return;
         }
         String commitID = args[1];
-        if (commitID.length() == 6) {
-            commitID = getlongSHA1(Commit_Dir,commitID);
-        } else if (commitID.length() != 40){
-            return;
+        if (commitID.length() != 40){
+            commitID = getlongCommitID(commitID);
+            if (commitID == null) {
+                System.err.println("No commit with that id exists.");
+                return;
+            }
         }
         checkoutAllfilesFromID(commitID);
         writeContents(activeBranch(),commitID);
