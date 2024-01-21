@@ -240,7 +240,7 @@ public class Repository {
         String branchName = args[1];
         File branchHeads = join(BRANCHS,branchName);
         if (branchHeads.exists()){
-            System.err.println("Error: A branch with that name already exists.");
+            System.err.println("A branch with that name already exists.");
             return;
         } else {
             writeContents(branchHeads,headCommitID());
@@ -419,7 +419,7 @@ public class Repository {
         }
     }
 
-    /**checkoutAllfiles form a long commitID and clear stageArea*/
+    /**checkoutAllfiles from a long commitID and clear stageArea*/
     private static void checkoutAllfilesFromID (String longCommitID) {
         Commit branchHead = getCommit(longCommitID);
         if (branchHead.equals(Head())) {
@@ -428,18 +428,20 @@ public class Repository {
         }
         List<String> CWDfiles = plainFilenamesIn(CWD);
         Set<String> branchHeadCommitFiles = branchHead.fileNameSet();
-        for (String file : CWDfiles) {
-            if (!isTracked(file) & branchHeadCommitFiles.contains(file)) {
-                System.err.println("There is an untracked file in the way; delete it, or add and commit it first.");
-                return;
+        if (!branchHeadCommitFiles.isEmpty()) {
+            for (String file : CWDfiles) {
+                if (!isTracked(file) & branchHeadCommitFiles.contains(file)) {
+                    System.err.println("There is an untracked file in the way; delete it, or add and commit it first.");
+                    return;
+                }
             }
-        }
-        for (String file : branchHeadCommitFiles) {
-            checkoutFileFromCommit(branchHead,file);
-        }
-        for (String file : CWDfiles) {
-            if (isTracked(file) && !branchHeadCommitFiles.contains(file)) {
-                join(CWD,file).delete();
+            for (String file : branchHeadCommitFiles) {
+                checkoutFileFromCommit(branchHead, file);
+            }
+            for (String file : CWDfiles) {
+                if (isTracked(file) && !branchHeadCommitFiles.contains(file)) {
+                    join(CWD,file).delete();
+                }
             }
         }
         clear(AddStageArea);
