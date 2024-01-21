@@ -387,16 +387,13 @@ public class Repository {
                 return;
             }
         }
-        if (longCommitID.equals(headCommitID())) {
-            System.err.println("No need to checkout the current branch.");
-            return;
-        }
         Commit commit = getCommit(longCommitID);
         checkoutFileFromCommit(commit,fileName);
     }
 
     private static void checkoutFileFromCommit (Commit commit, String fileName) {
         if (commit == null) {
+            System.err.println("No commit with that id exists.");
             return;
         }
         String blobID = commit.getBlob(fileName);

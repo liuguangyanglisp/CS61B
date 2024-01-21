@@ -121,7 +121,6 @@ public class Commit implements Serializable {
         String shortID = commitID.substring(0,6);
         File commitFile = join(Commit_Dir,shortID,commitID);
         if (!commitFile.isFile()) {
-            System.err.println("No commit with that id exists.");
             return null;
         } else {
             Commit commit = readObject(commitFile,Commit.class);
