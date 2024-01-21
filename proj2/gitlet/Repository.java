@@ -384,7 +384,6 @@ public class Repository {
         if (commitID.length() == 6) {
             longCommitID = getlongSHA1(Commit_Dir,commitID);
         } else if (commitID.length() != 40){
-            System.err.println("provide a 40 digist long commit ID or 6 digits prefix of the long commit ID. ");
             return;
         }
 
@@ -393,6 +392,9 @@ public class Repository {
     }
 
     private static void checkoutFileFromCommit (Commit commit, String fileName) {
+        if (commit == null) {
+            return;
+        }
         String blobID = commit.getBlob(fileName);
         if (blobID == null) {
             System.err.println("File does not exist in that commit.");
@@ -418,6 +420,9 @@ public class Repository {
     /**checkoutAllfiles from a long commitID and clear stageArea*/
     private static void checkoutAllfilesFromID (String longCommitID) {
         Commit branchHead = getCommit(longCommitID);
+        if (branchHead == null) {
+            return;
+        }
         if (branchHead.equals(Head())) {
             System.err.println("No need to checkout the current branch.");
             return;
@@ -432,7 +437,7 @@ public class Repository {
                 }
             }
         }
-        
+
         if (branchHeadCommitFiles != null) {
             for (String file : CWDfiles) {
                 if (!isTracked(file) & branchHeadCommitFiles.contains(file)) {
@@ -493,7 +498,6 @@ public class Repository {
         if (commitID.length() == 6) {
             commitID = getlongSHA1(Commit_Dir,commitID);
         } else if (commitID.length() != 40){
-            System.err.println("provide a 40 digist long commit ID or 6 digits prefix of the long commit ID. ");
             return;
         }
         checkoutAllfilesFromID(commitID);

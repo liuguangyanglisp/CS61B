@@ -14,7 +14,8 @@ public class Main {
     public static void main(String[] args) {
         // TODO: what if args is empty?
         if (args.length == 0) {
-            throw new GitletException("Must have at least one argument");
+            System.err.println("Must have at least one argument");
+            return;
         }
         String firstArg = args[0];
         switch(firstArg) {
@@ -60,6 +61,8 @@ public class Main {
             case "merge":
                 gitletmerge(args);
                 break;
+            default:
+                System.err.println("No command with that name exists.");
         }
     }
 }
