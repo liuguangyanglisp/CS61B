@@ -123,9 +123,10 @@ public class Commit implements Serializable {
         if (!commitFile.isFile()) {
             System.err.println("No commit with that id exists.");
             return null;
-            }
-        Commit commit = readObject(commitFile,Commit.class);
-        return commit;
+        } else {
+            Commit commit = readObject(commitFile,Commit.class);
+            return commit;
+        }
     }
     /*Return this commit's message.*/
     public String getMessage() {

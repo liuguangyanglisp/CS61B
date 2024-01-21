@@ -258,13 +258,13 @@ public class Repository {
         File branchHeadFile = join(BRANCHS,branchName);
         if (branchHeadFile.exists()){
             if (activeBranch().getName().equals(branchName)) {
-                System.err.println("Error: Cannot remove the current branch.");
+                System.err.println("Cannot remove the current branch.");
                 return;
             } else {
                 branchHeadFile.delete();
             }
         } else {
-            System.err.println("Error: A branch with that name does not exist.");
+            System.err.println("A branch with that name does not exist.");
         }
     }
 
@@ -389,10 +389,6 @@ public class Repository {
         }
 
         Commit commit = getCommit(longCommitID);
-        if (commit == null) {
-            System.err.println("No commit with that id exists.");
-            return;
-        }
         checkoutFileFromCommit(commit,fileName);
     }
 
@@ -428,6 +424,15 @@ public class Repository {
         }
         List<String> CWDfiles = plainFilenamesIn(CWD);
         Set<String> branchHeadCommitFiles = branchHead.fileNameSet();
+
+        if (branchHeadCommitFiles == null) {
+            for (String file : CWDfiles) {
+                if (isTracked(file)) {
+                    join(CWD, file).delete();
+                }
+            }
+        }
+        
         if (branchHeadCommitFiles != null) {
             for (String file : CWDfiles) {
                 if (!isTracked(file) & branchHeadCommitFiles.contains(file)) {
