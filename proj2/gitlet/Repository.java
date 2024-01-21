@@ -117,20 +117,6 @@ public class Repository {
         writeContents(blobfile,fileContent);
     }
 
-    public static Commit Head() {
-        Commit HEAD = Commit.getCommit(headCommitID());
-        return HEAD;
-    }
-
-    public static String headCommitID() {
-        return readContentsAsString(activeBranch());
-    }
-
-    public static File activeBranch() {
-        File activeBranch = new File(readContentsAsString(HEAD));
-        return activeBranch;
-    }
-
     /*Saves a snapshot of tracked files in the current commit and staging area so they can be restored at a later time, creating a new commit.
     The commit is said to be tracking the saved files.
     By default, each commit’s snapshot of files will be exactly the same as its parent commit’s snapshot of files;
@@ -148,18 +134,29 @@ public class Repository {
             System.err.println("Error: please provide a message. multiwords should be surrounded by quotation. ");
         }
         String message = args[1];
-        Commit newcommit = new Commit(message);
+        Commit newcommit = new Commit(message,null);
         newcommit.saveCommit();
+    }
+
+
+    public static Commit Head() {
+        Commit HEAD = Commit.getCommit(headCommitID());
+        return HEAD;
+    }
+
+    public static String headCommitID() {
+        return readContentsAsString(activeBranch());
+    }
+
+    public static File activeBranch() {
+        File activeBranch = new File(readContentsAsString(HEAD));
+        return activeBranch;
     }
 
     /**Unstage the file if it is currently staged for addition.
      * If the file is tracked in the current commit, stage it for removal and remove the file from the working directory if the user has not already done so
      * (do not remove it unless it is tracked in the current commit).*/
-    public static void gitletrm(String[] args) {
-        if (args.length != 2) {
-            throw new GitletException("Error: please provide a fileName");
-        }
-        String fileName = args[1];
+    public static void gitletrm(String fileName) {
         File sameFileInAddStage = join(AddStageArea,fileName);
 
         if (!sameFileInAddStage.exists() && !isTracked(fileName)) {
@@ -191,8 +188,12 @@ public class Repository {
      * take a commitID as argment. */
     private static void printlog (String commitID) {
         Commit commit = getCommit(commitID);
+        String secondParent = commit.getSecondParent();
         System.out.println("===");
         System.out.println("commit " + commitID);
+        if (secondParent != null) {
+            System.out.println("Merge: " + commitID.substring(0,6) + " " + secondParent.substring(0,6));
+        }
         System.out.println("Date: " + commit.getTime());
         System.out.println(commit.getMessage());
         System.out.println();
@@ -348,7 +349,7 @@ public class Repository {
     }
 
 
-    /**Return a blob(aka: SHA1 value, represent version) of a file according to its content.*/
+    /**Return a blob(aka: SHA1 value, represent version) of a file in CWD according to its content.*/
     private static String getBlob (File directory,String fileName) {
         File thefile = join(directory,fileName);
         if (thefile.isFile()) {
@@ -404,29 +405,33 @@ public class Repository {
             throw new GitletException("No such branch exists.");
         } else {
             String branchHeadCommitId = readContentsAsString(branch);
-            Commit branchHead = getCommit(branchHeadCommitId);
-            if (branchHead.equals(Head())) {
-                throw new GitletException("No need to checkout the current branch.");
-            }
-            List<String> CWDfiles = plainFilenamesIn(CWD);
-            Set<String> branchHeadCommitFiles = branchHead.fileNameSet();
-            for (String file : CWDfiles) {
-                if (!isTracked(file) & branchHeadCommitFiles.contains(file)) {
-                    throw new GitletException("There is an untracked file in the way; delete it, or add and commit it first.");
-                }
-            }
-            for (String file : branchHeadCommitFiles) {
-                checkoutFileFromCommit(branchHead,file);
-            }
-            for (String file : CWDfiles) {
-                if (isTracked(file) && !branchHeadCommitFiles.contains(file)) {
-                    join(CWD,file).delete();
-                }
-            }
-
-            clear(AddStageArea);
+            checkoutAllfilesFromID(branchHeadCommitId);
             moveHeadto(branchName);
         }
+    }
+
+    /**checkoutAllfiles form a long commitID and clear stageArea*/
+    private static void checkoutAllfilesFromID (String longCommitID) {
+        Commit branchHead = getCommit(longCommitID);
+        if (branchHead.equals(Head())) {
+            throw new GitletException("No need to checkout the current branch.");
+        }
+        List<String> CWDfiles = plainFilenamesIn(CWD);
+        Set<String> branchHeadCommitFiles = branchHead.fileNameSet();
+        for (String file : CWDfiles) {
+            if (!isTracked(file) & branchHeadCommitFiles.contains(file)) {
+                throw new GitletException("There is an untracked file in the way; delete it, or add and commit it first.");
+            }
+        }
+        for (String file : branchHeadCommitFiles) {
+            checkoutFileFromCommit(branchHead,file);
+        }
+        for (String file : CWDfiles) {
+            if (isTracked(file) && !branchHeadCommitFiles.contains(file)) {
+                join(CWD,file).delete();
+            }
+        }
+        clear(AddStageArea);
     }
 
     private static void moveHeadto (String branchName) {
@@ -459,5 +464,129 @@ public class Repository {
             Arrays.sort(files);
             return Arrays.asList(files);
         }
+    }
+
+    public static void gitletreset (String[] args) {
+        if (args.length != 2 || args[1].length() != 6) {
+            throw new GitletException("provide 6 digits abbreviated commitID. ");
+        }
+        String tempBranchHeadID = getlongSHA1(Commit_Dir,args[1]);
+        checkoutAllfilesFromID(tempBranchHeadID);
+        writeContents(activeBranch(),tempBranchHeadID);
+    }
+
+    public static void gitletmerge (String[] args) {
+        if (args.length != 2) {
+            throw new GitletException("provide a branchName");
+        }
+        if (AddStageArea.list().length != 0 || RemoveStageArea.list().length != 0 ) {
+            throw new GitletException("You have uncommitted changes.");
+        }
+
+        String branchName = args[1];
+        File givenBranch = join(BRANCHS,branchName);
+        if (!givenBranch.exists()) {
+            throw new GitletException("A branch with that name does not exist.");
+        }
+        String givenBranchCommitID = readContentsAsString(givenBranch);
+        if (givenBranchCommitID.equals(headCommitID())) {
+            throw new GitletException("Cannot merge a branch with itself.");
+        }
+        String splitPoint = splitPoint(branchName);
+        System.out.println(splitPoint);
+        if (splitPoint == null) {
+            throw new GitletException("splitPoint is null.");
+        }
+        if (splitPoint.equals(givenBranchCommitID)) {
+            System.out.println("Given branch is an ancestor of the current branch.");
+            return;
+        }
+        if (splitPoint.equals(headCommitID())) {
+            checkoutbranch(branchName);
+            System.out.println("Current branch fast-forwarded.");
+            return;
+        }
+
+        Set<String> splitPointFiles = getCommit(splitPoint).fileNameSet();
+        Set<String> currentBranchFiles = Head().fileNameSet();
+        Set<String> givenBranchFiles = getCommit(givenBranchCommitID).fileNameSet();
+        Set<String> fileNameCollection = new TreeSet<>();
+        fileNameCollection.addAll(splitPointFiles);
+        fileNameCollection.addAll(currentBranchFiles);
+        fileNameCollection.addAll(givenBranchFiles);
+
+
+        Commit splitPointCommit = getCommit(splitPoint);
+        Commit givenBranchCommit = getCommit(givenBranchCommitID);
+
+        for (String file : fileNameCollection) {
+            String splitPointBlob = splitPointCommit.getBlob(file);
+            String currentBranchBlob = Head().getBlob(file);
+            String givenBranchBlob = givenBranchCommit.getBlob(file);
+
+            /*1.Any files that have been modified in the given branch since the split point, but not modified in the current branch since the split point should be changed to their versions in the given branch*/
+            if (Objects.equals(splitPointBlob,currentBranchBlob) && !Objects.equals(splitPointBlob,givenBranchBlob)) {
+                if (!isTracked(file)) {
+                    throw new GitletException("There is an untracked file in the way; delete it, or add and commit it first.");
+                }
+                checkoutFileFromCommit(givenBranchCommit,file);
+            }
+            /*2.Any files that have been modified in the given branch since the split point, but not modified in the current branch since the split point should be changed to their versions in the given branch. */
+            if (!Objects.equals(splitPointBlob,currentBranchBlob) && Objects.equals(splitPointBlob,givenBranchBlob)) {
+                //stay as they are
+            }
+
+            /*3.Any files that have been modified in both the current and given branch in the same way (i.e., both files now have the same content or were both removed) are left unchanged by the merge.*/
+            if (!Objects.equals(splitPointBlob,currentBranchBlob) && Objects.equals(currentBranchBlob,givenBranchBlob)) {
+                //stay as they are
+            }
+
+            /*4.Any files that were not present at the split point and are present only in the current branch should remain as they are.*/
+            if (!splitPointFiles.contains(file) && !givenBranchFiles.contains(file) && currentBranchFiles.contains(file)) {
+                //stay as they are
+            }
+
+            /*5.Any files that were not present at the split point and are present only in the given branch should be checked out and staged.*/
+            if (!splitPointFiles.contains(file) && !splitPointFiles.contains(file) && !currentBranchFiles.contains(file)) {
+                if (!isTracked(file)) {
+                    throw new GitletException("There is an untracked file in the way; delete it, or add and commit it first.");
+                }
+                checkoutFileFromCommit(givenBranchCommit,file);
+                stageFile(file,AddStageArea);
+            }
+
+            /*6.Any files present at the split point, unmodified in the current branch, and absent in the given branch should be removed (and untracked).*/
+            if (splitPointFiles.contains(file) && Objects.equals(splitPointBlob,currentBranchBlob) && ! givenBranchFiles.contains(file)) {
+                gitletrm(file);
+            }
+
+            /*7.Any files present at the split point, unmodified in the given branch, and absent in the current branch should remain absent.*/
+            if (splitPointFiles.contains(file) && Objects.equals(splitPointBlob,givenBranchBlob) && !currentBranchFiles.contains(file)) {
+                //remain absent;
+            }
+
+            /*8.Any files modified in different ways in the current and given branches are in conflict. */
+            if (!Objects.equals(splitPointBlob,currentBranchBlob) && !Objects.equals(splitPointBlob,givenBranchBlob) && !Objects.equals(currentBranchBlob,givenBranchBlob)) {
+                if (!isTracked(file)) {
+                    throw new GitletException("There is an untracked file in the way; delete it, or add and commit it first.");
+                }
+                File CWDfile = join(CWD,file);
+                writeContents(CWDfile,"<<<<<<< HEAD",readContensFromeBlob(currentBranchBlob),"=======",readContensFromeBlob(givenBranchBlob),">>>>>>>");
+                stageFile(file,AddStageArea);
+                System.out.println("Encountered a merge conflict.");
+            }
+            String logMessage = "Merged " + givenBranch.getName()  +  " into " + activeBranch().getName() + ".";
+            Commit mergedCommit = new Commit(logMessage,givenBranchCommitID);
+            mergedCommit.saveCommit();
+        }
+
+
+    }
+
+    /*Given a blobID, return its contents. */
+    private static byte[] readContensFromeBlob (String blobID) {
+        String shortID = blobID.substring(0,6);
+        File blob = join(Blobs_Dir,shortID,blobID);
+        return readContents(blob);
     }
 }

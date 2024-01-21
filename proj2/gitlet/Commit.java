@@ -29,6 +29,7 @@ public class Commit implements Serializable {
 
     /*The parent commit of this Commit. */
     private String parent;
+    private String secondParent;
     /*If this is a merged Commit, it has a second parent. */
     private FileMap fileMap;
     private class FileMap extends TreeMap<String, String> {
@@ -57,13 +58,14 @@ public class Commit implements Serializable {
     //TODO: branch?
     //TODO: runtime
 
-    public Commit(String amessage) {
+    public Commit(String amessage,String secondprent) {
         if (amessage.isBlank()) {
             throw new GitletException("Please enter a commit message.");
         }
         message = amessage;
         time = new Date();
         parent = headCommitID();
+        secondParent = secondprent;
         fileMap = getCommit(parent).fileMap;
         trackStage();
     }
@@ -116,8 +118,9 @@ public class Commit implements Serializable {
     /*Return a Commit object,take an commitID as argument. */
     public static Commit getCommit (String commitID) {
         String shortID = commitID.substring(0,6);
-        File commit = join(Commit_Dir,shortID,commitID);
-        return readObject(commit,Commit.class);
+        File commitFile = join(Commit_Dir,shortID,commitID);
+        Commit commit = readObject(commitFile,Commit.class);
+        return commit;
     }
     /*Return this commit's message.*/
     public String getMessage() {
@@ -137,8 +140,11 @@ public class Commit implements Serializable {
         return this.fileMap.get(filename);
     }
     /**Returns this commit's parent commit.*/
-    public String getParent( ) {
+    public String getParent() {
         return this.parent;
+    }
+    public String getSecondParent() {
+        return this.secondParent;
     }
     /**Return fileNames of the commit in lexicographic order set. */
     public Set<String> fileNameSet() {
@@ -159,5 +165,21 @@ public class Commit implements Serializable {
         File shortSHA1file = join(directory,shortSHA1);
         List<String> longSHA1 = plainFilenamesIn(shortSHA1file);
         return longSHA1.getFirst();
+    }
+
+    public static String splitPoint (String givenBranchName) {
+        File givenBranch = join(BRANCHS,givenBranchName);
+        String currentBranchParent = Head().parent;
+        while (currentBranchParent != null) {
+            String givenBranchParent = getCommit(readContentsAsString(givenBranch)).parent;
+            while (givenBranchParent != null) {
+                if (currentBranchParent.equals(givenBranchParent)) {
+                    return currentBranchParent;
+                }
+                givenBranchParent = getCommit(givenBranchParent).parent;
+            }
+            currentBranchParent = getCommit(currentBranchParent).parent;
+        }
+        return null;
     }
 }

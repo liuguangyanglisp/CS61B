@@ -31,7 +31,7 @@ public class Main {
                 commit(args);
                 break;
             case "rm":
-                gitletrm(args);
+                gitletrm(args[1]);
                 break;
             case "log":
                 log();
@@ -53,6 +53,12 @@ public class Main {
                 break;
             case "checkout":
                 gitletCheckout(args);
+                break;
+            case "reset":
+                gitletreset(args);
+                break;
+            case "merge":
+                gitletmerge(args);
                 break;
         }
     }
