@@ -164,10 +164,10 @@ public class Commit implements Serializable {
     public static String getlongSHA1 (File directory,String shortSHA1) {
         File shortSHA1file = join(directory,shortSHA1);
         List<String> longSHA1 = plainFilenamesIn(shortSHA1file);
-        if (longSHA1 == null) {
+        if (longSHA1.isEmpty()) {
             throw new GitletException("Error: can't find longSHA1");
         } else {
-            return longSHA1.getFirst();
+            return longSHA1.get(0);
         }
     }
 
