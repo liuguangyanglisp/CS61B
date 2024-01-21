@@ -60,7 +60,8 @@ public class Commit implements Serializable {
 
     public Commit(String amessage,String secondprent) {
         if (amessage.isBlank()) {
-            throw new GitletException("Please enter a commit message.");
+            System.err.println("Please enter a commit message.");
+            return;
         }
         message = amessage;
         time = new Date();
@@ -76,7 +77,7 @@ public class Commit implements Serializable {
         List<String> addStageFileNames = plainFilenamesIn(AddStageArea);
         List<String> removeStageFileNames = plainFilenamesIn(RemoveStageArea);
         if (addStageFileNames.isEmpty() && removeStageFileNames.isEmpty()) {
-            throw new GitletException("No changes added to the commit.");
+            System.err.println("No changes added to the commit.");
         }
 
             for (String fileName : addStageFileNames) {
