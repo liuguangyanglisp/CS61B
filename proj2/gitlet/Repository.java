@@ -52,7 +52,7 @@ public class Repository {
     (this is called “The (Unix) Epoch”, represented internally by the time 0.)
     Since the initial commit in all repositories created by Gitlet will have exactly the same content,
     it follows that all repositories will automatically share this commit (they will all have the same UID) and all commits in all repositories will trace back to it.*/
-    public static void init() throws IOException {
+    public static void init()  {
         if (GITLET_DIR.exists()) {
             throw new GitletException("A Gitlet version-control system already exists in the current directory.");
         } else {
@@ -129,7 +129,7 @@ public class Repository {
     Files staged for addition and removal are the updates to the commit.
     Of course, the date (and likely the mesage) will also different from the parent.*/
     /*TODO: how to deal with quotation word*/
-    public static void commit(String[] args) throws IOException {
+    public static void commit(String[] args) {
         if (args.length != 2) {
             System.err.println("Error: please provide a message. multiwords should be surrounded by quotation. ");
         }
@@ -248,7 +248,7 @@ public class Repository {
     /**Deletes the branch with the given name.
      * This only means to delete the pointer associated with the branch;
      * it does not mean to delete all commits that were created under the branch, or anything like that. */
-    public static void rmBranch(String[] args) throws IOException {
+    public static void rmBranch(String[] args)  {
         if (args.length != 2) {
             throw new GitletException("Error: please provide a branchName");
         }
