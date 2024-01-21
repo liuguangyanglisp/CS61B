@@ -428,7 +428,7 @@ public class Repository {
         }
         List<String> CWDfiles = plainFilenamesIn(CWD);
         Set<String> branchHeadCommitFiles = branchHead.fileNameSet();
-        if (!branchHeadCommitFiles.isEmpty()) {
+        if (branchHeadCommitFiles != null) {
             for (String file : CWDfiles) {
                 if (!isTracked(file) & branchHeadCommitFiles.contains(file)) {
                     System.err.println("There is an untracked file in the way; delete it, or add and commit it first.");
@@ -440,7 +440,7 @@ public class Repository {
             }
             for (String file : CWDfiles) {
                 if (isTracked(file) && !branchHeadCommitFiles.contains(file)) {
-                    join(CWD,file).delete();
+                    join(CWD, file).delete();
                 }
             }
         }

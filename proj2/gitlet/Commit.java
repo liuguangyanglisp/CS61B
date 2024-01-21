@@ -120,6 +120,10 @@ public class Commit implements Serializable {
     public static Commit getCommit (String commitID) {
         String shortID = commitID.substring(0,6);
         File commitFile = join(Commit_Dir,shortID,commitID);
+        if (!commitFile.isFile()) {
+            System.err.println("No commit with that id exists.");
+            return null;
+            }
         Commit commit = readObject(commitFile,Commit.class);
         return commit;
     }
