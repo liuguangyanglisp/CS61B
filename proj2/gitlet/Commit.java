@@ -206,7 +206,6 @@ public class Commit implements Serializable {
             String givenBranchParent = getCommit(readContentsAsString(givenBranch)).parent;
             while (givenBranchParent != null) {
                 if (currentBranchParent.equals(givenBranchParent)) {
-                    System.out.println(currentBranchParent);
                     return currentBranchParent;
                 }
                 givenBranchParent = getCommit(givenBranchParent).parent;

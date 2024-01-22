@@ -545,11 +545,19 @@ public class Repository {
         Commit splitPointCommit = getCommit(splitPoint);
 
         //All files set in HEAD,Given and splitPoint commit.
-        Set<String> fileSet = Head().fileNameSet();
+        Set<String> headFiles = Head().fileNameSet();
         Set<String> splitPointFiles = getCommit(splitPoint).fileNameSet();
         Set<String> givenFiles = getCommit(givenID).fileNameSet();
-        fileSet.addAll(splitPointFiles);
-        fileSet.addAll(givenFiles);
+        TreeSet<String> fileSet = new TreeSet<>();
+        for (String file : headFiles) {
+            fileSet.add(file);
+        }
+        for (String file : splitPointFiles) {
+            fileSet.add(file);
+        }
+        for (String file : givenFiles) {
+            fileSet.add(file);
+        }
 
         // stor files need to change for later check.
         TreeMap<String,String> fileTochange = new TreeMap<>();
@@ -571,8 +579,13 @@ public class Repository {
             }
 
             /*3.Any files that have been modified in both the current and given branch in the same way (i.e., both files now have the same content or were both removed) are left unchanged by the merge.*/
-            if (!Objects.equals(splitBlob,headBlob) && Objects.equals(headBlob,givenBlob)) {
-                //stay as they are
+            if (!Objects.equals(splitBlob,headBlob) && !Objects.equals(splitBlob,givenBlob)) {
+                //stay as they are if same.
+                /*8.Any files modified in different ways in the current and given branches are in conflict. */
+                if (!Objects.equals(headBlob,givenBlob)) {
+                    fileTochange.put(file,"conflict");
+                    conflictFiles ++;
+                }
             }
 
             /*4.Any files that were not present at the split point and are present only in the current branch should remain as they are.*/
@@ -594,17 +607,12 @@ public class Repository {
             if (splitBlob != null && Objects.equals(splitBlob,givenBlob) && headBlob == null) {
                 //remain absent;
             }
-
-            /*8.Any files modified in different ways in the current and given branches are in conflict. */
-            if (!Objects.equals(splitBlob,headBlob) && !Objects.equals(splitBlob,givenBlob) && !Objects.equals(headBlob,givenBlob)) {
-                fileTochange.put(file,"conflict");
-                conflictFiles ++;
-            }
         }
 
         //If an untracked file in the current commit would be overwritten or deleted by the merge, print There is an untracked file in the way; delete it, or add and commit it first. and exit; perform this check before doing anything else.
-        for (String file : fileTochange.keySet()) {
-            if (!isTracked(file)) {
+        List<String> CWDfiles = plainFilenamesIn(CWD);
+        for (String file : CWDfiles) {
+            if (fileTochange.containsKey(file) && !isTracked(file)) {
                 System.err.println("There is an untracked file in the way; delete it, or add and commit it first.");
                 return;
             }
@@ -625,9 +633,9 @@ public class Repository {
         //TODO:  If merge would generate an error because the commit that it does has no changes in it, just let the normal commit error message for this go through.
         String logMessage = "Merged " + givenBranch.getName()  +  " into " + activeBranch().getName() + ".";
         Commit mergedCommit = new Commit(logMessage,givenID);
-        if (mergedCommit != null && conflictFiles != 0) {
+        /*if (mergedCommit != null && conflictFiles != 0) {
             System.out.println("Encountered a merge conflict.");
-        }
+        }*/
     }
 
     /*Given a blobID, return its contents. */
