@@ -379,13 +379,9 @@ public class Repository {
     }
 
     private static void checkoutFileFromID (String commitID, String fileName) {
-        if (commitID.length() >= 6) {
             String longCommitID = getlongCommitID(commitID);
             Commit commit = getCommit(longCommitID);
             checkoutFileFromCommit(commit,fileName);
-        } else {
-            System.out.println("No commit with that id exists.");
-        }
     }
 
     private static void checkoutFileFromCommit (Commit commit, String fileName) {
@@ -406,25 +402,27 @@ public class Repository {
 
     private static void checkoutbranch (String branchName) {
         File branch = join(BRANCHS,branchName);
-        if (!branch.exists()) {
-            System.err.println("No such branch exists.");
-        } else {
+        if (branch.exists()) {
+            if (branchName.equals(activeBranch().getName())) {
+                System.err.println("No need to checkout the current branch.");
+                return;
+            }
             String branchHeadCommitId = readContentsAsString(branch);
-            checkoutAllfilesFromID(branchHeadCommitId);
-            moveHeadto(branchName);
+            boolean result = checkoutAllfilesFromID(branchHeadCommitId);
+            if (result == true) {
+                moveHeadto(branchName);
+            }
+        } else {
+            System.err.println("No such branch exists.");
         }
     }
 
     /**checkoutAllfiles from a long commitID and clear stageArea*/
-    private static void checkoutAllfilesFromID (String longCommitID) {
+    private static boolean checkoutAllfilesFromID (String longCommitID) {
         Commit branchHead = getCommit(longCommitID);
         if (branchHead == null) {
             System.err.println("No commit with that id exists.");
-            return;
-        }
-        if (longCommitID.equals(headCommitID())) {
-            System.err.println("No need to checkout the current branch.");
-            return;
+            return false;
         }
         List<String> CWDfiles = plainFilenamesIn(CWD);
         Set<String> branchHeadCommitFiles = branchHead.fileNameSet();
@@ -441,7 +439,7 @@ public class Repository {
             for (String file : CWDfiles) {
                 if (!isTracked(file) & branchHeadCommitFiles.contains(file)) {
                     System.err.println("There is an untracked file in the way; delete it, or add and commit it first.");
-                    return;
+                    return false;
                 }
             }
             for (String file : branchHeadCommitFiles) {
@@ -454,6 +452,7 @@ public class Repository {
             }
         }
         clear(AddStageArea);
+        return true;
     }
 
     private static void moveHeadto (String branchName) {
@@ -494,13 +493,14 @@ public class Repository {
             return;
         }
         String commitID = args[1];
-
-        if (commitID.length() >= 6) {
-            String longCommitID = getlongCommitID(commitID);
-            checkoutAllfilesFromID(longCommitID);
-            writeContents(activeBranch(),longCommitID);
-        }else {
+        String longCommitID = getlongCommitID(commitID);
+        if (longCommitID == null) {
             System.err.println("No commit with that id exists.");
+            return;
+        }
+        boolean result = checkoutAllfilesFromID(longCommitID);
+        if (result == true) {
+            writeContents(activeBranch(),longCommitID);
         }
     }
 

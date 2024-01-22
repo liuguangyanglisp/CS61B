@@ -118,15 +118,38 @@ public class Commit implements Serializable {
 
     /*Return a Commit object,take an commitID as argument. */
     public static Commit getCommit (String commitID) {
+        if (commitID == null) {
+            return null;
+        }
         String shortID = commitID.substring(0,6);
         File commitFile = join(Commit_Dir,shortID,commitID);
-        if (!commitFile.exists()) {
-            return null;
-        } else {
+        if (commitFile.exists()) {
             Commit commit = readObject(commitFile,Commit.class);
             return commit;
         }
+        return null;
     }
+
+    /**Given a abbreviate commitID , return a long commitID (sha1)*/
+    public static String getlongCommitID (String commitID) {
+        if (commitID == null) {
+            return null;
+        }
+        if (commitID.length() == 40) {
+            return commitID;
+        }
+        if (commitID.length() >=6 && commitID.length() <40) {
+            String sixDigitsID = commitID.substring(0, 6);
+            File shortCommitIDfile = join(Commit_Dir,sixDigitsID);
+            if (shortCommitIDfile.exists()) {
+                List<String> longCommitID = plainFilenamesIn(shortCommitIDfile);
+                return longCommitID.get(0);
+            }
+        }
+        return null;
+
+    }
+
     /*Return this commit's message.*/
     public String getMessage() {
         return this.message;
@@ -163,18 +186,6 @@ public class Commit implements Serializable {
     /**Return Files(Map) of this commit*/
     public FileMap getFileMap () {
         return fileMap;
-    }
-
-    /**Given a short commitID(sha1 6digits prefix), return a long commitID (sha1)*/
-    public static String getlongCommitID (String shortCommitID) {
-        String sixDigitsID = shortCommitID.substring(0, 6);
-        File shortCommitIDfile = join(Commit_Dir,sixDigitsID);
-        if (shortCommitIDfile.exists()) {
-            List<String> longCommitID = plainFilenamesIn(shortCommitIDfile);
-            return longCommitID.get(0);
-        } else {
-            return null;
-        }
     }
 
     public static String splitPoint (String givenBranchName) {
