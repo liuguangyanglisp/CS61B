@@ -187,7 +187,7 @@ public class Repository {
         System.out.println("===");
         System.out.println("commit " + commitID);
         if (secondParent != null) {
-            System.out.println("Merge: " + commitID.substring(0,6) + " " + secondParent.substring(0,6));
+            System.out.println("Merge:" + " " + commitID.substring(0,7) + " " + secondParent.substring(0,7));
         }
         System.out.println("Date: " + commit.getTime());
         System.out.println(commit.getMessage());
@@ -619,13 +619,23 @@ public class Repository {
         }
 
         for (String file : fileTochange.keySet()) {
-            if (file.equals("add")) {
+            String operation = fileTochange.get(file);
+            if (operation.equals("add")) {
                 checkoutFileFromID(givenID,file);
                 gitletadd(file);
-            } else if (file.equals("remove")) {
+            } else if (operation.equals("remove")) {
                 gitletrm(file);
-            } else if (file.equals("conflict")) {
-                writeContents(join(CWD,file),"<<<<<<< HEAD",readContensFromeBlob(Head().getBlob(file)),"=======",readContensFromeBlob(givenCommit.getBlob(file)),">>>>>>>");
+            } else if (operation.equals("conflict")) {
+                File CWDfile = join(CWD, file);
+                String headContent = readContensFromeBlob(Head().getBlob(file));
+                String givenContent = readContensFromeBlob(givenCommit.getBlob(file));
+                if (headContent == null) {
+                    writeContents(CWDfile, "<<<<<<< HEAD\n" + "=======\n" + givenContent + ">>>>>>>\n");
+                } else if (givenContent == null) {
+                    writeContents(CWDfile, "<<<<<<< HEAD\n" + headContent + "=======\n" + ">>>>>>>\n");
+                } else {
+                    writeContents(CWDfile, "<<<<<<< HEAD\n" + headContent + "=======\n" + givenContent + ">>>>>>>\n");
+                }
                 gitletadd(file);
             }
         }
@@ -633,15 +643,18 @@ public class Repository {
         //TODO:  If merge would generate an error because the commit that it does has no changes in it, just let the normal commit error message for this go through.
         String logMessage = "Merged " + givenBranch.getName()  +  " into " + activeBranch().getName() + ".";
         Commit mergedCommit = new Commit(logMessage,givenID);
-        /*if (mergedCommit != null && conflictFiles != 0) {
+        if (mergedCommit != null && conflictFiles != 0) {
             System.out.println("Encountered a merge conflict.");
-        }*/
+        }
     }
 
     /*Given a blobID, return its contents. */
-    private static byte[] readContensFromeBlob (String blobID) {
+    private static String readContensFromeBlob (String blobID) {
+        if (blobID == null) {
+            return null;
+        }
         String shortID = blobID.substring(0,6);
         File blob = join(Blobs_Dir,shortID,blobID);
-        return readContents(blob);
+        return readContentsAsString(blob);
     }
 }
