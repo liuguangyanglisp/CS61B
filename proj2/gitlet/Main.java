@@ -25,7 +25,7 @@ public class Main {
                 break;
             case "add":
                 // TODO: handle the `add [filename]` command
-                gitletadd(args);
+                gitletadd(args[1]);
                 break;
             // TODO: FILL THE REST IN
             case "commit":
@@ -60,6 +60,9 @@ public class Main {
                 break;
             case "merge":
                 gitletmerge(args);
+                break;
+            case "split":
+                Commit.splitPoint(args[1]);
                 break;
             default:
                 System.err.println("No command with that name exists.");

@@ -27,6 +27,8 @@ public class Commit implements Serializable {
     //TODO: where to put blob?should blob be short?
     public static final File Blobs_Dir = join(GITLET_DIR,"blobs");
 
+    private static int number;
+
     /*The parent commit of this Commit. */
     private String parent;
     private String secondParent;
@@ -46,6 +48,9 @@ public class Commit implements Serializable {
     public Commit() {
         message = "initial commit";
         time = new Date(0);
+        if (number == 0) {
+            saveCommit();
+        }
     }
 
     /*Any changes made to files after staging for addition or removal are ignored by the commit command,
@@ -68,16 +73,21 @@ public class Commit implements Serializable {
         parent = headCommitID();
         secondParent = secondprent;
         fileMap = getCommit(parent).fileMap;
-        trackStage();
+        boolean result = trackStage();
+        if (result == true) {
+            saveCommit();
+            number ++;
+        }
     }
 
     /**track or remove files from this commit according to stageArea.
      * empty add-StageArea and remove-StageArea*/
-    private  void trackStage() {
+    private  boolean trackStage() {
         List<String> addStageFileNames = plainFilenamesIn(AddStageArea);
         List<String> removeStageFileNames = plainFilenamesIn(RemoveStageArea);
         if (addStageFileNames.isEmpty() && removeStageFileNames.isEmpty()) {
             System.err.println("No changes added to the commit.");
+            return false;
         }
 
             for (String fileName : addStageFileNames) {
@@ -93,14 +103,15 @@ public class Commit implements Serializable {
 
             for (String fileName : removeStageFileNames) {
                 File stageFile = join(RemoveStageArea,fileName);
-                String blobId = readContentsAsString(stageFile);
+                //String blobId = readContentsAsString(stageFile);
                 fileMap.remove(fileName);
                 stageFile.delete();
             }
+            return true;
         }
 
     /**Save this commit into file, and let it be HEAD.*/
-    public void saveCommit() {
+    private void saveCommit() {
         //serialize commit and generate SHA1
         byte[] serializeCommit = serialize(this);
         String commitID = sha1(serializeCommit);
@@ -195,6 +206,7 @@ public class Commit implements Serializable {
             String givenBranchParent = getCommit(readContentsAsString(givenBranch)).parent;
             while (givenBranchParent != null) {
                 if (currentBranchParent.equals(givenBranchParent)) {
+                    System.out.println(currentBranchParent);
                     return currentBranchParent;
                 }
                 givenBranchParent = getCommit(givenBranchParent).parent;
