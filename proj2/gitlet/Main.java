@@ -31,7 +31,7 @@ public class Main {
                 break;
             // TODO: FILL THE REST IN
             case "commit":
-                commit(args);
+                gitletCommit(args[1]);
                 break;
             case "rm":
                 gitletrm(args[1]);

@@ -180,13 +180,12 @@ public class Commit implements Serializable {
 
     /**Return this commit's time in String format*/
     public String getTime() {
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        /*SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         String formattedDate = formatter.format(time);
-        return formattedDate;
-        /*Formatter formatter = new Formatter(Locale.US);
-        String dateString = formatter.format
-        ("%1$ta %1$tb %1$te %1$tT %1$tY %1$tz", time).toString();
-        return dateString;*/
+        return formattedDate;*/
+        Formatter formatter = new Formatter(Locale.US);
+        String dateString = formatter.format("%1$ta %1$tb %1$te %1$tT %1$tY %1$tz", time).toString();
+        return dateString;
     }
 
     /**Return this commit's blobID*/
