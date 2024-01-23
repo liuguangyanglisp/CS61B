@@ -1,50 +1,51 @@
 package gitlet;
 
-// TODO: any imports you need here
 import java.io.File;
 import java.io.Serializable;
 import java.util.*;
 import static gitlet.Repository.*;
 import static gitlet.Utils.*;
 
-
-/** Represents a gitlet commit object.
- *  TODO: It's a good idea to give a description here of what else this Class
- *  does at a high level.
+/**Represents a gitlet commit object.
+ * construct commit and save it into file system.
+ * To make commit immutable, all instance variable are private
+ * commit information can get by method, like: parents/files/messages/commitID/splitPoint etc.
  *
- *  @author LiuGuangYang
+ * @author liuguangyang
  */
 public class Commit implements Serializable {
-    /**
-     * TODO: add instance variables here.
-     *
-     * List all instance variables of the Commit class here with a useful
+    /**List all instance variables of the Commit class here with a useful
      * comment above them describing what that variable represents and how that
      * variable is used. We've provided one example for `message`.
      */
-    public static final File Commit_Dir = join(GITLET_DIR,"commits");
+    /**Folder to store commit file.*/
+    public static final File COMMIT_DIR = join(GITLET_DIR, "commits");
 
-    //TODO: where to put blob?should blob be short?
-    public static final File Blobs_Dir = join(GITLET_DIR,"blobs");
-
+    /**Folder to store bolob file. */
+    public static final File BLOBS_DIR = join(GITLET_DIR, "blobs");
+    /**numbers of commit has been made. */
     private static int number;
-
-    /*The parent commit of this Commit. */
+    /**The first parent commit of this Commit. */
     private String parent;
+    /**second parent of a merged commit. */
     private String secondParent;
-    /*If this is a merged Commit, it has a second parent. */
+    /**Map of all the files the commit is tracking.
+     * key: fileName, value: blobID. */
     private FileMap fileMap;
+    /**FileMap class and constructor. FileMap is a TreeMap. */
     private class FileMap extends TreeMap<String, String> {
-        private FileMap (String filename, String blobID) {
-            put(filename,blobID);
+        private FileMap(String filename, String blobID) {
+            put(filename, blobID);
         }
     }
-    /*Commit time. */
+
+    /**Commit time. */
     private Date time;
-    /** The message of this Commit. */
+    /**The message of this Commit. */
     private String message;
 
-    /* TODO: fill in the rest of this class. */
+    /**Construct an init commit and save it in file when gitlet init.
+     * only use once in a gitlet repo. */
     public Commit() {
         message = "initial commit";
         time = new Date(0);
@@ -53,17 +54,14 @@ public class Commit implements Serializable {
         }
     }
 
-    /*Any changes made to files after staging for addition or removal are ignored by the commit command,
-    which only modifies the contents of the .gitlet directory.
-    For example, if you remove a tracked file using the Unix rm command (rather than Gitlet’s command of the same name),
-    it has no effect on the next commit, which will still contain the (now deleted) version of the file.*/
-    /*TODO:Each commit has a log message associated with it that describes the changes to the files in the commit.
-    This is specified by the user. The entire message should take up only one entry in the array args that is passed to main.
-    To include multiword messages, you’ll have to surround them in quotes.*/
-    //TODO: branch?
-    //TODO: runtime
-
-    public Commit(String amessage,String secondprent) {
+    /**Saves a snapshot of tracked files in the current commit and staging area so they can be restored at a later time, creating a new commit.
+     * The commit is said to be tracking the saved files. By default, each commit’s snapshot of files will be exactly the same as its parent commit’s snapshot of files;
+     * it will keep versions of files exactly as they are, and not update them.
+     * A commit will only update the contents of files it is tracking that have been staged for addition at the time of commit,
+     * in which case the commit will now include the version of the file that was staged instead of the version it got from its parent.
+     * A commit will save and start tracking any files that were staged for addition but weren’t tracked by its parent.
+     * Finally, files tracked in the current commit may be untracked in the new commit as a result being staged for removal by the rm command (below).*/
+    public Commit(String amessage, String secondprent) {
         if (amessage.isBlank()) {
             System.err.println("Please enter a commit message.");
             return;
@@ -76,115 +74,138 @@ public class Commit implements Serializable {
         boolean result = trackStage();
         if (result == true) {
             saveCommit();
-            number ++;
+            number++;
         }
     }
 
     /**track or remove files from this commit according to stageArea.
-     * empty add-StageArea and remove-StageArea*/
-    private  boolean trackStage() {
-        List<String> addStageFileNames = plainFilenamesIn(AddStageArea);
-        List<String> removeStageFileNames = plainFilenamesIn(RemoveStageArea);
+     * empty add-StageArea and remove-StageArea
+     */
+    private boolean trackStage() {
+        List<String> addStageFileNames = plainFilenamesIn(ADDSTAGEAREA_DIR);
+        List<String> removeStageFileNames = plainFilenamesIn(REMOVESTAGEAREA_DIR);
         if (addStageFileNames.isEmpty() && removeStageFileNames.isEmpty()) {
             System.err.println("No changes added to the commit.");
             return false;
         }
 
-            for (String fileName : addStageFileNames) {
-                File stageFile = join(AddStageArea, fileName);
-                String blobId = readContentsAsString(stageFile);
-                if (fileMap == null) {
-                    fileMap = new FileMap(fileName,blobId);
-                }
-                fileMap.put(fileName, blobId);
-                stageFile.delete();
+        for (String fileName : addStageFileNames) {
+            File stageFile = join(ADDSTAGEAREA_DIR, fileName);
+            String blobId = readContentsAsString(stageFile);
+            if (fileMap == null) {
+                fileMap = new FileMap(fileName, blobId);
             }
-
-
-            for (String fileName : removeStageFileNames) {
-                File stageFile = join(RemoveStageArea,fileName);
-                //String blobId = readContentsAsString(stageFile);
-                fileMap.remove(fileName);
-                stageFile.delete();
-            }
-            return true;
+            fileMap.put(fileName, blobId);
+            stageFile.delete();
         }
 
-    /**Save this commit into file, and let it be HEAD.*/
+
+        for (String fileName : removeStageFileNames) {
+            File stageFile = join(REMOVESTAGEAREA_DIR, fileName);
+            //String blobId = readContentsAsString(stageFile);
+            fileMap.remove(fileName);
+            stageFile.delete();
+        }
+        return true;
+    }
+
+    /**Save this commit into file, and let it be HEAD.
+     */
     private void saveCommit() {
         //serialize commit and generate SHA1
         byte[] serializeCommit = serialize(this);
         String commitID = sha1(serializeCommit);
-        String shortCommitID = commitID.substring(0,6);
+        String shortCommitID = commitID.substring(0, 6);
 
         //use SHA1 to create a file in Commit_Dir,and write the commit into the file.
-        File storeDir = join(Commit_Dir,shortCommitID);
+        File storeDir = join(COMMIT_DIR, shortCommitID);
         storeDir.mkdir();
-        File storFile = join(storeDir,commitID);
-        writeObject(storFile,this);
+        File storFile = join(storeDir, commitID);
+        writeObject(storFile, this);
 
         //change HEAD(activeBranch) to the newest commit.
-        writeContents(activeBranch(),commitID);
+        writeContents(activeBranch(), commitID);
+    }
+
+    /**Return the HEAD commit.*/
+    public static Commit Head() {
+        Commit HEAD = Commit.getCommit(headCommitID());
+        return HEAD;
+    }
+    /**Return the commtID of the HEAD commit. */
+    public static String headCommitID() {
+        return readContentsAsString(activeBranch());
+    }
+
+    /**Return the File path of activeBranch. */
+    public static File activeBranch() {
+        File activeBranch = new File(readContentsAsString(HEAD));
+        return activeBranch;
     }
 
     /*Return a Commit object,take an commitID as argument. */
-    public static Commit getCommit (String commitID) {
+    public static Commit getCommit(String commitID) {
         if (commitID == null) {
             return null;
         }
-        String shortID = commitID.substring(0,6);
-        File commitFile = join(Commit_Dir,shortID,commitID);
+        String shortID = commitID.substring(0, 6);
+        File commitFile = join(COMMIT_DIR, shortID, commitID);
         if (commitFile.exists()) {
-            Commit commit = readObject(commitFile,Commit.class);
+            Commit commit = readObject(commitFile, Commit.class);
             return commit;
         }
         return null;
     }
 
-    /**Given a abbreviate commitID , return a long commitID (sha1)*/
-    public static String getlongCommitID (String commitID) {
+    /**Given a abbreviate commitID , return a long commitID (sha1)
+     */
+    public static String getlongCommitID(String commitID) {
         if (commitID == null) {
             return null;
         }
         if (commitID.length() == 40) {
             return commitID;
         }
-        if (commitID.length() >=6 && commitID.length() <40) {
+        if (commitID.length() >= 6 && commitID.length() < 40) {
             String sixDigitsID = commitID.substring(0, 6);
-            File shortCommitIDfile = join(Commit_Dir,sixDigitsID);
+            File shortCommitIDfile = join(COMMIT_DIR, sixDigitsID);
             if (shortCommitIDfile.exists()) {
                 List<String> longCommitID = plainFilenamesIn(shortCommitIDfile);
                 return longCommitID.get(0);
             }
         }
         return null;
-
     }
 
-    /*Return this commit's message.*/
+    /**Return this commit's message.*/
     public String getMessage() {
         return this.message;
     }
-    /*Return this commit's time in String format*/
+
+    /**Return this commit's time in String format*/
     public String getTime() {
         Formatter formatter = new Formatter(Locale.US);
         String dateString = formatter.format("%1$ta %1$tb %1$te %1$tT %1$tY %1$tz", time).toString();
         return dateString;
     }
-    /*Return this commit's blobID*/
+
+    /**Return this commit's blobID*/
     public String getBlob(String filename) {
         if (this.fileMap == null) {
             return null;
         }
         return this.fileMap.get(filename);
     }
-    /**Returns this commit's parent commit.*/
+
+    /**Returns this commit's parent commit. */
     public String getParent() {
         return this.parent;
     }
+    /**Returns this commit's second parent. */
     public String getSecondParent() {
         return this.secondParent;
     }
+
     /**Return fileNames of the commit in lexicographic order set. */
     public Set<String> fileNameSet() {
         if (fileMap == null) {
@@ -194,11 +215,12 @@ public class Commit implements Serializable {
         }
     }
 
-    public static String splitPoint (String headID, String branchID) {
+    /**Return a commit ID which is the splitPoint of Head and another branch when merge. */
+    public static String splitPoint(String headID, String branchID) {
         Collection<String> headParent = new TreeSet<>();
         Queue<String> branchParent = new ArrayDeque<>();
-        headParent = getParentsFromID(headID,headParent);
-        branchParent = (Queue<String>) getParentsFromID(branchID,branchParent);
+        headParent = getParentsFromID(headID, headParent);
+        branchParent = (Queue<String>) getParentsFromID(branchID, branchParent);
 
         while (!branchParent.isEmpty()) {
             String currentID = branchParent.poll();
@@ -208,8 +230,9 @@ public class Commit implements Serializable {
         }
         return null;
     }
-
-    private static  Collection<String> getParentsFromID (String commitID, Collection<String> collection) {
+    /**Return a collection of all parents of a commit.
+    * Return type can be Queue/TreeSet etc. */
+    private static Collection<String> getParentsFromID(String commitID, Collection<String> collection) {
         Queue<String> queue = new ArrayDeque<>();
         queue.add(commitID);
         Collection<String> parents = collection;
@@ -229,6 +252,4 @@ public class Commit implements Serializable {
         }
         return parents;
     }
-
-
 }
