@@ -194,24 +194,40 @@ public class Commit implements Serializable {
         }
     }
 
-    /**Return Files(Map) of this commit*/
-    public FileMap getFileMap () {
-        return fileMap;
-    }
-
-    public static String splitPoint (String givenBranchName) {
-        File givenBranch = join(BRANCHS,givenBranchName);
-        String currentBranchParent = Head().parent;
-        while (currentBranchParent != null) {
-            String givenBranchParent = getCommit(readContentsAsString(givenBranch)).parent;
-            while (givenBranchParent != null) {
-                if (currentBranchParent.equals(givenBranchParent)) {
-                    return currentBranchParent;
-                }
-                givenBranchParent = getCommit(givenBranchParent).parent;
+    public static String splitPoint (String headID, String branchID) {
+        Collection<String> headParent = new TreeSet<>();
+        Queue<String> branchParent = new ArrayDeque<>();
+        headParent = getParentsFromID(headID,headParent);
+        branchParent = (Queue<String>) getParentsFromID(branchID,branchParent);
+        while (!branchParent.isEmpty()) {
+            String currentID = branchParent.poll();
+            if (headParent.contains(currentID)) {
+                return currentID;
             }
-            currentBranchParent = getCommit(currentBranchParent).parent;
         }
         return null;
     }
+
+    private static  Collection<String> getParentsFromID (String commitID, Collection<String> collection) {
+        Queue<String> queue = new ArrayDeque<>();
+        queue.add(commitID);
+        Collection<String> parents = collection;
+        parents.add(commitID);
+
+        while (!queue.isEmpty()) {
+            String currentID = queue.poll();
+            Commit commit = getCommit(currentID);
+            if (commit.parent != null && !parents.contains(commit.parent)) {
+                queue.add(commit.parent);
+                parents.add(commit.parent);
+            }
+            if (commit.secondParent != null && !parents.contains(commit.secondParent)) {
+                queue.add(commit.secondParent);
+                parents.add(commit.secondParent);
+            }
+        }
+        return parents;
+    }
+
+
 }

@@ -57,7 +57,7 @@ public class Main {
                 gitletreset(args);
                 break;
             case "merge":
-                gitletmerge(args);
+                gitletmerge(args[1]);
                 break;
             case "split":
                 Commit.splitPoint(args[1]);

@@ -500,18 +500,8 @@ public class Repository {
         }
     }
 
-    public static void gitletmerge (String[] args) {
-        if (args.length != 2) {
-            System.err.println("provide a branchName");
-            return;
-        }
-        //If there are staged additions or removals present, print the error message You have uncommitted changes. and exit.
-        if (AddStageArea.list().length != 0 || RemoveStageArea.list().length != 0 ) {
-            System.err.println("You have uncommitted changes.");
-            return;
-        }
+    public static void gitletmerge (String branchName) {
         //Given branch: name, ID, commit
-        String branchName = args[1];
         File givenBranch = join(BRANCHS,branchName);
 
         //If a branch with the given name does not exist, print the error message A branch with that name does not exist.
@@ -527,8 +517,14 @@ public class Repository {
         }
         Commit givenCommit = getCommit(givenID);
 
+        //If there are staged additions or removals present, print the error message You have uncommitted changes. and exit.
+        if (AddStageArea.list().length != 0 || RemoveStageArea.list().length != 0 ) {
+            System.err.println("You have uncommitted changes.");
+            return;
+        }
+
         //splitPoint: ID
-        String splitPoint = splitPoint(branchName);
+        String splitPoint = splitPoint(headCommitID(),givenID);
         if (splitPoint == null) {
             System.err.println("splitPoint is null.");
             return;
@@ -544,20 +540,8 @@ public class Repository {
         }
         Commit splitPointCommit = getCommit(splitPoint);
 
-        //All files set in HEAD,Given and splitPoint commit.
-        Set<String> headFiles = Head().fileNameSet();
-        Set<String> splitPointFiles = getCommit(splitPoint).fileNameSet();
-        Set<String> givenFiles = getCommit(givenID).fileNameSet();
-        TreeSet<String> fileSet = new TreeSet<>();
-        for (String file : headFiles) {
-            fileSet.add(file);
-        }
-        for (String file : splitPointFiles) {
-            fileSet.add(file);
-        }
-        for (String file : givenFiles) {
-            fileSet.add(file);
-        }
+        /**Return a file set of these commit.*/
+        TreeSet<String> fileSet = fileSet(headCommitID(),splitPoint,givenID);
 
         // stor files need to change for later check.
         TreeMap<String,String> fileTochange = new TreeMap<>();
@@ -571,13 +555,11 @@ public class Repository {
             /*1.Any files that have been modified in the given branch since the split point, but not modified in the current branch since the split point should be changed to their versions in the given branch*/
             if (!Objects.equals(splitBlob,givenBlob) && Objects.equals(splitBlob,headBlob)) {
                 fileTochange.put(file,"add");
-
             }
             /*2.Any files that have been modified in the current branch but not in the given branch since the split point should stay as they are. */
             if (!Objects.equals(splitBlob,headBlob) && Objects.equals(splitBlob,givenBlob)) {
                 //stay as they are
             }
-
             /*3.Any files that have been modified in both the current and given branch in the same way (i.e., both files now have the same content or were both removed) are left unchanged by the merge.*/
             if (!Objects.equals(splitBlob,headBlob) && !Objects.equals(splitBlob,givenBlob)) {
                 //stay as they are if same.
@@ -587,28 +569,23 @@ public class Repository {
                     conflictFiles ++;
                 }
             }
-
             /*4.Any files that were not present at the split point and are present only in the current branch should remain as they are.*/
             if (splitBlob == null && givenBlob == null && headBlob != null) {
                 //stay as they are
             }
-
             /*5.Any files that were not present at the split point and are present only in the given branch should be checked out and staged.*/
             if (splitBlob == null && headBlob == null && givenBlob != null) {
                 fileTochange.put(file,"add");
             }
-
             /*6.Any files present at the split point, unmodified in the current branch, and absent in the given branch should be removed (and untracked).*/
             if (splitBlob != null && Objects.equals(splitBlob,headBlob) && givenBlob == null) {
                 fileTochange.put(file,"remove");
             }
-
             /*7.Any files present at the split point, unmodified in the given branch, and absent in the current branch should remain absent.*/
             if (splitBlob != null && Objects.equals(splitBlob,givenBlob) && headBlob == null) {
                 //remain absent;
             }
         }
-
         //If an untracked file in the current commit would be overwritten or deleted by the merge, print There is an untracked file in the way; delete it, or add and commit it first. and exit; perform this check before doing anything else.
         List<String> CWDfiles = plainFilenamesIn(CWD);
         for (String file : CWDfiles) {
@@ -629,18 +606,11 @@ public class Repository {
                 File CWDfile = join(CWD, file);
                 String headContent = readContensFromeBlob(Head().getBlob(file));
                 String givenContent = readContensFromeBlob(givenCommit.getBlob(file));
-                if (headContent == null) {
-                    writeContents(CWDfile, "<<<<<<< HEAD\n" + "=======\n" + givenContent + ">>>>>>>\n");
-                } else if (givenContent == null) {
-                    writeContents(CWDfile, "<<<<<<< HEAD\n" + headContent + "=======\n" + ">>>>>>>\n");
-                } else {
-                    writeContents(CWDfile, "<<<<<<< HEAD\n" + headContent + "=======\n" + givenContent + ">>>>>>>\n");
-                }
+                writeContents(CWDfile, "<<<<<<< HEAD\n" + headContent + "=======\n" + givenContent + ">>>>>>>\n");
                 gitletadd(file);
             }
         }
-
-        //TODO:  If merge would generate an error because the commit that it does has no changes in it, just let the normal commit error message for this go through.
+        //If merge would generate an error because the commit that it does has no changes in it, just let the normal commit error message for this go through.
         String logMessage = "Merged " + givenBranch.getName()  +  " into " + activeBranch().getName() + ".";
         Commit mergedCommit = new Commit(logMessage,givenID);
         if (mergedCommit != null && conflictFiles != 0) {
@@ -656,5 +626,32 @@ public class Repository {
         String shortID = blobID.substring(0,6);
         File blob = join(Blobs_Dir,shortID,blobID);
         return readContentsAsString(blob);
+    }
+
+    /**All files set in HEAD,Given and splitPoint commit.*/
+    private static TreeSet<String> fileSet (String ... commitID) {
+        TreeSet<String> fileSet = new TreeSet<>();
+        for (String id : commitID) {
+            Set<String> files =  getCommit(id).fileNameSet();
+            if (files == null) continue;
+            for (String file : files) {
+                fileSet.add(file);
+            }
+        }
+        return fileSet;
+        /*Set<String> headFiles = Head().fileNameSet();
+        Set<String> splitPointFiles = getCommit(splitPoint).fileNameSet();
+        Set<String> givenFiles = getCommit(givenID).fileNameSet();
+
+        for (String file : headFiles) {
+            fileSet.add(file);
+        }
+        for (String file : splitPointFiles) {
+            fileSet.add(file);
+        }
+        for (String file : givenFiles) {
+            fileSet.add(file);
+        }*/
+
     }
 }
