@@ -5,8 +5,6 @@ import java.io.Serializable;
 import java.util.*;
 import static gitlet.Repository.*;
 import static gitlet.Utils.*;
-import java.text.SimpleDateFormat;
-
 
 /**Represents a gitlet commit object.
  * construct commit and save it into file system.

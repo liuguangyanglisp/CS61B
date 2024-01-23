@@ -213,7 +213,7 @@ public class Repository {
             String commitMessage = Commit.getCommit(longCommitID).getMessage();
             if (commitMessage.equals(message)) {
                 System.out.println(longCommitID);
-                findTimes ++ ;
+                findTimes++;
             }
         }
         if (findTimes == 0) {
@@ -569,7 +569,7 @@ public class Repository {
             return;
         }
 
-        TreeMap<String,String> fileTochange = fileCheck(splitPoint,headCommitID(),givenID);
+        TreeMap<String, String> fileTochange = fileCheck(splitPoint, headCommitID(), givenID);
 
         //If an untracked file in the current commit would be overwritten or deleted by the merge,
         // print There is an untracked file in the way; delete it,
@@ -594,7 +594,7 @@ public class Repository {
             } else if (operation.equals("conflict")) {
                 mergeConflictFile(file, givenID);
                 add(file);
-                conflictFiles ++ ;
+                conflictFiles++;
             }
         }
         //If merge would generate an error because the commit that it does has no changes in it,
@@ -656,15 +656,16 @@ public class Repository {
         return fileSet;
     }
 
-    /**Check files of the 3 commit, and return a TreeMap containing files need to be changed.
+    /**Check files of the splitPoint, head, given branch.
+     * return a TreeMap containing files need to be changed.
      * key: fileName; value: "add", "rm" or "conflict".*/
-    private static TreeMap<String,String> fileCheck(String spID, String headID, String branchID) {
-        TreeSet<String> fileSet = fileSet(spID, headID, branchID);
+    private static TreeMap<String, String> fileCheck(String split, String head, String branch) {
+        TreeSet<String> fileSet = fileSet(split, head, branch);
         TreeMap<String, String> fileTochange = new TreeMap<>();
         for (String file : fileSet) {
-            String splitBlob = getCommit(spID).getBlob(file);
-            String headBlob = getCommit(headID).getBlob(file);
-            String givenBlob = getCommit(branchID).getBlob(file);
+            String splitBlob = getCommit(split).getBlob(file);
+            String headBlob = getCommit(head).getBlob(file);
+            String givenBlob = getCommit(branch).getBlob(file);
             /*1.Any files that have been modified in the given branch since the split point
             but not modified in the current branch
             since the split point should be changed to their versions in the given branch*/
