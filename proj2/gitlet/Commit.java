@@ -5,6 +5,8 @@ import java.io.Serializable;
 import java.util.*;
 import static gitlet.Repository.*;
 import static gitlet.Utils.*;
+import java.text.SimpleDateFormat;
+
 
 /**Represents a gitlet commit object.
  * construct commit and save it into file system.
@@ -54,13 +56,8 @@ public class Commit implements Serializable {
         }
     }
 
-    /**Saves a snapshot of tracked files in the current commit and staging area so they can be restored at a later time, creating a new commit.
-     * The commit is said to be tracking the saved files. By default, each commit’s snapshot of files will be exactly the same as its parent commit’s snapshot of files;
-     * it will keep versions of files exactly as they are, and not update them.
-     * A commit will only update the contents of files it is tracking that have been staged for addition at the time of commit,
-     * in which case the commit will now include the version of the file that was staged instead of the version it got from its parent.
-     * A commit will save and start tracking any files that were staged for addition but weren’t tracked by its parent.
-     * Finally, files tracked in the current commit may be untracked in the new commit as a result being staged for removal by the rm command (below).*/
+    /**Create a new commit,save a snapshot of tracked files in the current commit and staging area
+     * so they can be restored at a later time.The commit is said to be tracking the saved files.*/
     public Commit(String amessage, String secondprent) {
         if (amessage.isBlank()) {
             System.err.println("Please enter a commit message.");
@@ -71,8 +68,7 @@ public class Commit implements Serializable {
         parent = headCommitID();
         secondParent = secondprent;
         fileMap = getCommit(parent).fileMap;
-        boolean result = trackStage();
-        if (result == true) {
+        if (trackStage() == true) {
             saveCommit();
             number++;
         }
@@ -128,9 +124,9 @@ public class Commit implements Serializable {
     }
 
     /**Return the HEAD commit.*/
-    public static Commit Head() {
-        Commit HEAD = Commit.getCommit(headCommitID());
-        return HEAD;
+    public static Commit head() {
+        Commit head = Commit.getCommit(headCommitID());
+        return head;
     }
     /**Return the commtID of the HEAD commit. */
     public static String headCommitID() {
@@ -184,9 +180,13 @@ public class Commit implements Serializable {
 
     /**Return this commit's time in String format*/
     public String getTime() {
-        Formatter formatter = new Formatter(Locale.US);
-        String dateString = formatter.format("%1$ta %1$tb %1$te %1$tT %1$tY %1$tz", time).toString();
-        return dateString;
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        String formattedDate = formatter.format(time);
+        return formattedDate;
+        /*Formatter formatter = new Formatter(Locale.US);
+        String dateString = formatter.format
+        ("%1$ta %1$tb %1$te %1$tT %1$tY %1$tz", time).toString();
+        return dateString;*/
     }
 
     /**Return this commit's blobID*/
@@ -215,12 +215,12 @@ public class Commit implements Serializable {
         }
     }
 
-    /**Return a commit ID which is the splitPoint of Head and another branch when merge. */
+    /**Return a commit ID which is the splitPoint of Head and another branch when merging. */
     public static String splitPoint(String headID, String branchID) {
         Collection<String> headParent = new TreeSet<>();
         Queue<String> branchParent = new ArrayDeque<>();
-        headParent = getParentsFromID(headID, headParent);
-        branchParent = (Queue<String>) getParentsFromID(branchID, branchParent);
+        headParent = getParents(headID, headParent);
+        branchParent = (Queue<String>) getParents(branchID, branchParent);
 
         while (!branchParent.isEmpty()) {
             String currentID = branchParent.poll();
@@ -232,10 +232,10 @@ public class Commit implements Serializable {
     }
     /**Return a collection of all parents of a commit.
     * Return type can be Queue/TreeSet etc. */
-    private static Collection<String> getParentsFromID(String commitID, Collection<String> collection) {
+    private static Collection<String> getParents(String commitID, Collection<String> col) {
         Queue<String> queue = new ArrayDeque<>();
         queue.add(commitID);
-        Collection<String> parents = collection;
+        Collection<String> parents = col;
         parents.add(commitID);
 
         while (!queue.isEmpty()) {

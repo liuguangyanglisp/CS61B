@@ -52,21 +52,20 @@ public class Repository {
      * A file whose contend is a file path point to the current branch head file.
      */
     public static final File HEAD = join(GITLET_DIR, "HEAD");
-    /*A directory containing all branch head files, which are named in their branch name and write commitID in the file.*/
+    /**A directory containing all branch head files
+    which are named in their branch name and write commitID in the file.*/
     public static final File BRANCHS = join(GITLET_DIR, "branchHeads");
 
 
     /*Creates a new Gitlet version-control system in the current directory.
     This system will automatically start with one commit:
-    a commit that contains no files and has the commit message initial commit (just like that, with no punctuation).
-    It will have a single branch: master, which initially points to this initial commit, and master will be the current branch.
-    The timestamp for this initial commit will be 00:00:00 UTC, Thursday, 1 January 1970 in whatever format you choose for dates
-    (this is called “The (Unix) Epoch”, represented internally by the time 0.)
-    Since the initial commit in all repositories created by Gitlet will have exactly the same content,
-    it follows that all repositories will automatically share this commit (they will all have the same UID) and all commits in all repositories will trace back to it.*/
+    a commit that contains no files and has the commit message initial commit.
+    It will have a single branch: master, which initially points to this initial commit,
+    and master will be the current branch. */
     public static void init() {
         if (GITLET_DIR.exists()) {
-            System.err.println("A Gitlet version-control system already exists in the current directory.");
+            System.err.println("A Gitlet version-control system already " +
+                    "exists in the current directory.");
         } else {
             GITLET_DIR.mkdir();
 
@@ -85,13 +84,16 @@ public class Repository {
     }
 
     /**
-     * Adds a copy of the file as it currently exists to the staging area (see the description of the commit command).
+     * Adds a copy of the file as it currently exists to the staging area.
      * For this reason, adding a file is also called staging the file for addition.
-     * Staging an already-staged file overwrites the previous entry in the staging area with the new contents.
+     * Staging an already-staged file overwrites the previous entry
+     * in the staging area with the new contents.
      * The staging area should be somewhere in .gitlet.
-     * The file will no longer be staged for removal (see gitlet rm), if it was at the time of the command.
-     * If the current working version of the file is identical to the version in the current commit, do not stage it to be added,
-     * and remove it from the staging area if it is already there (as can happen when a file is changed, added, and then changed back to it’s original version).
+     * The file will no longer be staged for removal (see gitlet rm),
+     * if it was at the time of the command.
+     * If the current working version of the file is identical to the version in current commit,
+     * do not stage it to be added,
+     * and remove it from the staging area if it is already there
      */
     public static void gitletadd(String fileName) {
         File fileInCWD = join(CWD, fileName);
@@ -112,8 +114,8 @@ public class Repository {
      * Stage a file from CWD to stageArea fore add.
      */
     private static void stageFileForAdd(String fileName) {
-        File CWDfile = join(CWD, fileName);
-        byte[] fileContent = readContents(CWDfile);
+        File fileInCWD = join(CWD, fileName);
+        byte[] fileContent = readContents(fileInCWD);
         String blobID = sha1(fileContent);
         String shortBlobID = blobID.substring(0, 6);
 
@@ -157,7 +159,7 @@ public class Repository {
 
         if (isTracked(fileName)) {
             //stage it for removal.
-            String blobID = Head().getBlob(fileName);
+            String blobID = head().getBlob(fileName);
             File stageFile = join(REMOVESTAGEAREA_DIR, fileName);
             writeContents(stageFile, blobID);
             //delete it form current working directory.
@@ -198,7 +200,7 @@ public class Repository {
      * Print logs of all the commits ever made.
      */
     public static void globallog() {
-        List<String> commitFileNames = FilenamesIn(COMMIT_DIR);
+        List<String> commitFileNames = fileNamesIn(COMMIT_DIR);
         for (String commitFileName : commitFileNames) {
             String longCommitID = getlongCommitID(commitFileName);
             printlog(longCommitID);
@@ -214,7 +216,7 @@ public class Repository {
             return;
         }
         String message = args[1];
-        List<String> commitFileNames = FilenamesIn(COMMIT_DIR);
+        List<String> commitFileNames = fileNamesIn(COMMIT_DIR);
         int findTimes = 0;
         for (String commitFileName : commitFileNames) {
             String longCommitID = getlongCommitID(commitFileName);
@@ -305,8 +307,8 @@ public class Repository {
         System.out.println("\n" + "=== Modifications Not Staged For Commit ===");
 
         //Tracked in the current commit, changed in the working directory, but not staged; or
-        List<String> CWDfileNames = plainFilenamesIn(CWD);
-        for (String fileName : CWDfileNames) {
+        List<String> fileNamesInCWD = plainFilenamesIn(CWD);
+        for (String fileName : fileNamesInCWD) {
             if (isTracked(fileName) && !identical(CWD, fileName) && !addStageFileNames.contains(fileName)) {
                 System.out.println(fileName + "(modified)");
             }
@@ -323,7 +325,7 @@ public class Repository {
         }
 
         //Not staged for removal, but tracked in the current commit and deleted from the working directory.
-        Set<String> currentCommitFiles = Head().fileNameSet();
+        Set<String> currentCommitFiles = head().fileNameSet();
         if (currentCommitFiles != null) {
             for (String fileName : currentCommitFiles) {
                 if (!join(CWD, fileName).exists() && !join(REMOVESTAGEAREA_DIR, fileName).exists()) {
@@ -334,7 +336,7 @@ public class Repository {
 
         //for files present in the working directory but neither staged for addition nor tracked.
         System.out.println("\n" + "=== Untracked Files ===");
-        for (String fileName : CWDfileNames) {
+        for (String fileName : fileNamesInCWD) {
             if (!isTracked(fileName) && !join(ADDSTAGEAREA_DIR, fileName).exists()) {
                 System.out.println(fileName);
             }
@@ -348,10 +350,10 @@ public class Repository {
      * Given a fileName(not SHA1), check if it's tracked in current commit
      */
     private static boolean isTracked(String fileName) {
-        if (Head() == null) {
+        if (head() == null) {
             return false;
         }
-        return Head().getBlob(fileName) != null;
+        return head().getBlob(fileName) != null;
     }
 
     /**
@@ -359,8 +361,8 @@ public class Repository {
      */
     private static boolean identical(File directory, String fileName) {
         String directoryVersion = getBlob(directory, fileName);
-        String HEADcommitVersion = Head().getBlob(fileName);
-        if (Objects.equals(directoryVersion, HEADcommitVersion) == true) {
+        String headCommitVersion = head().getBlob(fileName);
+        if (Objects.equals(directoryVersion, headCommitVersion) == true) {
             return true;
         }
         return false;
@@ -392,7 +394,7 @@ public class Repository {
      */
     public static void gitletCheckout(String[] args) {
         if (args.length == 3 && args[1].equals("--")) {
-            checkoutFileFromCommit(Head(), args[2]);
+            checkoutFileFromCommit(head(), args[2]);
         } else if (args.length == 4 && args[2].equals("--")) {
             checkoutFileFromID(args[1], args[3]);
         } else if (args.length == 2) {
@@ -459,11 +461,11 @@ public class Repository {
             System.err.println("No commit with that id exists.");
             return false;
         }
-        List<String> CWDfiles = plainFilenamesIn(CWD);
+        List<String> filenamesInCWD = plainFilenamesIn(CWD);
         Set<String> branchHeadCommitFiles = branchHead.fileNameSet();
 
         if (branchHeadCommitFiles == null) {
-            for (String file : CWDfiles) {
+            for (String file : filenamesInCWD) {
                 if (isTracked(file)) {
                     join(CWD, file).delete();
                 }
@@ -471,7 +473,7 @@ public class Repository {
         }
 
         if (branchHeadCommitFiles != null) {
-            for (String file : CWDfiles) {
+            for (String file : filenamesInCWD) {
                 if (!isTracked(file) & branchHeadCommitFiles.contains(file)) {
                     System.err.println("There is an untracked file in the way; delete it, or add and commit it first.");
                     return false;
@@ -480,7 +482,7 @@ public class Repository {
             for (String file : branchHeadCommitFiles) {
                 checkoutFileFromCommit(branchHead, file);
             }
-            for (String file : CWDfiles) {
+            for (String file : filenamesInCWD) {
                 if (isTracked(file) && !branchHeadCommitFiles.contains(file)) {
                     join(CWD, file).delete();
                 }
@@ -520,7 +522,7 @@ public class Repository {
      * lexicographic order as Java Strings.  Returns null if DIR does
      * not denote a directory.
      */
-    public static List<String> FilenamesIn(File dir) {
+    public static List<String> fileNamesIn(File dir) {
         String[] files = dir.list();
         if (files == null) {
             return null;
@@ -541,8 +543,7 @@ public class Repository {
             System.err.println("No commit with that id exists.");
             return;
         }
-        boolean result = checkoutAllfilesFromID(longCommitID);
-        if (result == true) {
+        if (checkoutAllfilesFromID(longCommitID) == true) {
             writeContents(activeBranch(), longCommitID);
         }
     }
@@ -597,7 +598,7 @@ public class Repository {
 
         for (String file : fileSet) {
             String splitBlob = splitPointCommit.getBlob(file);
-            String headBlob = Head().getBlob(file);
+            String headBlob = head().getBlob(file);
             String givenBlob = givenCommit.getBlob(file);
 
             /*1.Any files that have been modified in the given branch since the split point, but not modified in the current branch since the split point should be changed to their versions in the given branch*/
@@ -605,9 +606,9 @@ public class Repository {
                 fileTochange.put(file, "add");
             }
             /*2.Any files that have been modified in the current branch but not in the given branch since the split point should stay as they are. */
-            if (!Objects.equals(splitBlob, headBlob) && Objects.equals(splitBlob, givenBlob)) {
+            /*if (!Objects.equals(splitBlob, headBlob) && Objects.equals(splitBlob, givenBlob)) {
                 //stay as they are
-            }
+            }*/
             /*3.Any files that have been modified in both the current and given branch in the same way (i.e., both files now have the same content or were both removed) are left unchanged by the merge.*/
             if (!Objects.equals(splitBlob, headBlob) && !Objects.equals(splitBlob, givenBlob)) {
                 //stay as they are if same.
@@ -618,9 +619,9 @@ public class Repository {
                 }
             }
             /*4.Any files that were not present at the split point and are present only in the current branch should remain as they are.*/
-            if (splitBlob == null && givenBlob == null && headBlob != null) {
+            /*if (splitBlob == null && givenBlob == null && headBlob != null) {
                 //stay as they are
-            }
+            }*/
             /*5.Any files that were not present at the split point and are present only in the given branch should be checked out and staged.*/
             if (splitBlob == null && headBlob == null && givenBlob != null) {
                 fileTochange.put(file, "add");
@@ -630,13 +631,13 @@ public class Repository {
                 fileTochange.put(file, "remove");
             }
             /*7.Any files present at the split point, unmodified in the given branch, and absent in the current branch should remain absent.*/
-            if (splitBlob != null && Objects.equals(splitBlob, givenBlob) && headBlob == null) {
+            /*if (splitBlob != null && Objects.equals(splitBlob, givenBlob) && headBlob == null) {
                 //remain absent;
-            }
+            }*/
         }
         //If an untracked file in the current commit would be overwritten or deleted by the merge, print There is an untracked file in the way; delete it, or add and commit it first. and exit; perform this check before doing anything else.
-        List<String> CWDfiles = plainFilenamesIn(CWD);
-        for (String file : CWDfiles) {
+        List<String> filesInCWD = plainFilenamesIn(CWD);
+        for (String file : filesInCWD) {
             if (fileTochange.containsKey(file) && !isTracked(file)) {
                 System.err.println("There is an untracked file in the way; delete it, or add and commit it first.");
                 return;
@@ -652,7 +653,7 @@ public class Repository {
                 gitletrm(file);
             } else if (operation.equals("conflict")) {
                 File CWDfile = join(CWD, file);
-                String headContent = readContensFromeBlob(Head().getBlob(file));
+                String headContent = readContensFromeBlob(head().getBlob(file));
                 String givenContent = readContensFromeBlob(givenCommit.getBlob(file));
                 if (headContent == null) {
                     writeContents(CWDfile, "<<<<<<< HEAD\n" + "=======\n" + givenContent + ">>>>>>>\n");
@@ -698,7 +699,9 @@ public class Repository {
         TreeSet<String> fileSet = new TreeSet<>();
         for (String id : commitID) {
             Set<String> files = getCommit(id).fileNameSet();
-            if (files == null) continue;
+            if (files == null) {
+                continue;
+            }
             for (String file : files) {
                 fileSet.add(file);
             }
