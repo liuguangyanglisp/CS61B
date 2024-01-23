@@ -17,7 +17,7 @@ public class Main {
         }
         String firstArg = args[0];
         if (!GITLET_DIR.exists() && !firstArg.equals("init")) {
-            System.err.println("Not in an initialized Gitlet directory.");
+            System.err.println("Not in a1tn initialized Gitlet directory.");
             return;
         }
         switch(firstArg) {

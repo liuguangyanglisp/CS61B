@@ -541,23 +541,9 @@ public class Repository {
         Commit splitPointCommit = getCommit(splitPoint);
 
         /**Return a file set of these commit.*/
-        /*TreeSet<String> fileSet = fileSet(headCommitID(),splitPoint,givenID);*/
-        TreeSet<String> fileSet = new TreeSet<>();
+        TreeSet<String> fileSet = fileSet(headCommitID(),splitPoint,givenID);
 
         // stor files need to change for later check.
-        Set<String> headFiles = Head().fileNameSet();
-        Set<String> splitPointFiles = getCommit(splitPoint).fileNameSet();
-        Set<String> givenFiles = getCommit(givenID).fileNameSet();
-
-        for (String file : headFiles) {
-            fileSet.add(file);
-        }
-        for (String file : splitPointFiles) {
-            fileSet.add(file);
-        }
-        for (String file : givenFiles) {
-            fileSet.add(file);
-        }
         TreeMap<String,String> fileTochange = new TreeMap<>();
         int conflictFiles  = 0;
 
@@ -621,11 +607,11 @@ public class Repository {
                 String headContent = readContensFromeBlob(Head().getBlob(file));
                 String givenContent = readContensFromeBlob(givenCommit.getBlob(file));
                 if (headContent == null) {
-                    writeContents(CWDfile, "<<<<<<< HEAD\n" + "\n=======\n" + givenContent + ">>>>>>>\n");
+                    writeContents(CWDfile, "<<<<<<< HEAD\n" + "=======\n" + givenContent + ">>>>>>>\n");
                 } else if (givenContent == null) {
-                    writeContents(CWDfile, "<<<<<<< HEAD\n" + headContent + "\n=======\n" + ">>>>>>>\n");
+                    writeContents(CWDfile, "<<<<<<< HEAD\n" + headContent + "=======\n" + ">>>>>>>\n");
                 } else {
-                    writeContents(CWDfile, "<<<<<<< HEAD\n" + headContent + "\n=======\n" + givenContent + ">>>>>>>\n");
+                    writeContents(CWDfile, "<<<<<<< HEAD\n" + headContent + "=======\n" + givenContent + ">>>>>>>\n");
                 }
                 gitletadd(file);
             }
@@ -645,7 +631,13 @@ public class Repository {
         }
         String shortID = blobID.substring(0,6);
         File blob = join(Blobs_Dir,shortID,blobID);
-        return readContentsAsString(blob);
+        String content = readContentsAsString(blob);
+        if (content.contains("\n")) {
+            return content;
+        } else {
+            String contentWithNewline = content + "\n";
+            return contentWithNewline;
+        }
     }
 
     /**All files set in HEAD,Given and splitPoint commit.*/
