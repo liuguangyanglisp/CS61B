@@ -541,9 +541,23 @@ public class Repository {
         Commit splitPointCommit = getCommit(splitPoint);
 
         /**Return a file set of these commit.*/
-        TreeSet<String> fileSet = fileSet(headCommitID(),splitPoint,givenID);
+        /*TreeSet<String> fileSet = fileSet(headCommitID(),splitPoint,givenID);*/
+        TreeSet<String> fileSet = new TreeSet<>();
 
         // stor files need to change for later check.
+        Set<String> headFiles = Head().fileNameSet();
+        Set<String> splitPointFiles = getCommit(splitPoint).fileNameSet();
+        Set<String> givenFiles = getCommit(givenID).fileNameSet();
+
+        for (String file : headFiles) {
+            fileSet.add(file);
+        }
+        for (String file : splitPointFiles) {
+            fileSet.add(file);
+        }
+        for (String file : givenFiles) {
+            fileSet.add(file);
+        }
         TreeMap<String,String> fileTochange = new TreeMap<>();
         int conflictFiles  = 0;
 
@@ -606,7 +620,13 @@ public class Repository {
                 File CWDfile = join(CWD, file);
                 String headContent = readContensFromeBlob(Head().getBlob(file));
                 String givenContent = readContensFromeBlob(givenCommit.getBlob(file));
-                writeContents(CWDfile, "<<<<<<< HEAD\n" + headContent + "=======\n" + givenContent + ">>>>>>>\n");
+                if (headContent == null) {
+                    writeContents(CWDfile, "<<<<<<< HEAD\n" + "\n=======\n" + givenContent + ">>>>>>>\n");
+                } else if (givenContent == null) {
+                    writeContents(CWDfile, "<<<<<<< HEAD\n" + headContent + "\n=======\n" + ">>>>>>>\n");
+                } else {
+                    writeContents(CWDfile, "<<<<<<< HEAD\n" + headContent + "\n=======\n" + givenContent + ">>>>>>>\n");
+                }
                 gitletadd(file);
             }
         }
@@ -639,19 +659,6 @@ public class Repository {
             }
         }
         return fileSet;
-        /*Set<String> headFiles = Head().fileNameSet();
-        Set<String> splitPointFiles = getCommit(splitPoint).fileNameSet();
-        Set<String> givenFiles = getCommit(givenID).fileNameSet();
-
-        for (String file : headFiles) {
-            fileSet.add(file);
-        }
-        for (String file : splitPointFiles) {
-            fileSet.add(file);
-        }
-        for (String file : givenFiles) {
-            fileSet.add(file);
-        }*/
 
     }
 }
