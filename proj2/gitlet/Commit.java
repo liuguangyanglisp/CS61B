@@ -199,6 +199,7 @@ public class Commit implements Serializable {
         Queue<String> branchParent = new ArrayDeque<>();
         headParent = getParentsFromID(headID,headParent);
         branchParent = (Queue<String>) getParentsFromID(branchID,branchParent);
+
         while (!branchParent.isEmpty()) {
             String currentID = branchParent.poll();
             if (headParent.contains(currentID)) {

@@ -12,10 +12,13 @@ public class Main {
     public static void main(String[] args) {
         // TODO: what if args is empty?
         if (args.length == 0) {
-            System.err.println("Must have at least one argument");
+            System.err.println("Please enter a command");
             return;
         }
         String firstArg = args[0];
+        if (!GITLET_DIR.exists() && !firstArg.equals("init")) {
+            System.err.println("Not in an initialized Gitlet directory.");
+        }
         switch(firstArg) {
             case "init":
                 // TODO: handle the `init` command
@@ -58,9 +61,6 @@ public class Main {
                 break;
             case "merge":
                 gitletmerge(args[1]);
-                break;
-            case "split":
-                Commit.splitPoint(args[1]);
                 break;
             default:
                 System.err.println("No command with that name exists.");
