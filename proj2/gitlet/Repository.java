@@ -605,6 +605,7 @@ public class Repository {
             }
         }
 
+        int conflictFiles = 0;
         for (String file : fileTochange.keySet()) {
             String operation = fileTochange.get(file);
             if (operation.equals("add")) {
@@ -613,13 +614,9 @@ public class Repository {
             } else if (operation.equals("remove")) {
                 gitletrm(file);
             } else if (operation.equals("conflict")) {
-                File fileInCWD = join(CWD, file);
-                String headContent = readContensFromeBlob(head().getBlob(file));
-                String givenContent = readContensFromeBlob(getCommit(givenID).getBlob(file));
-                writeContents(fileInCWD, "<<<<<<< HEAD\n" +
-                        headContent + "=======\n" + givenContent + ">>>>>>>\n");
-                System.out.println("Encountered a merge conflict.");
+                mergeConlictFile(file, givenID);
                 gitletadd(file);
+                conflictFiles ++;
             }
         }
         //If merge would generate an error because the commit that it does has no changes in it,
@@ -627,6 +624,9 @@ public class Repository {
         String logMessage = "Merged " + givenBranch.getName() +
                 " into " + activeBranch().getName() + ".";
         Commit mergedCommit = new Commit(logMessage, givenID);
+        if (mergedCommit != null && conflictFiles != 0) {
+            System.out.println("Encountered a merge conflict.");
+        }
     }
 
     /**
@@ -645,6 +645,20 @@ public class Repository {
         } else {
             String contentWithNewline = content + "\n";
             return contentWithNewline;
+        }
+    }
+    /*Given a fileName and branchID, merge the file's head and branch version,
+    and write the content in to a same name file in current working directory. */
+    private static void mergeConlictFile (String file, String branchID) {
+        File fileInCWD = join(CWD, file);
+        String headContent = readContensFromeBlob(head().getBlob(file));
+        String givenContent = readContensFromeBlob(getCommit(branchID).getBlob(file));
+        if (headContent == null) {
+            writeContents(fileInCWD, "<<<<<<< HEAD\n" + "=======\n" + givenContent + ">>>>>>>\n");
+        } else if (givenContent == null) {
+            writeContents(fileInCWD, "<<<<<<< HEAD\n" + headContent + "=======\n" + ">>>>>>>\n");
+        } else {
+            writeContents(fileInCWD, "<<<<<<< HEAD\n" + headContent + "=======\n" + givenContent + ">>>>>>>\n");
         }
     }
 
