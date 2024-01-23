@@ -27,14 +27,14 @@ public class Main {
                 break;
             case "add":
                 // TODO: handle the `add [filename]` command
-                gitletadd(args[1]);
+                add(args[1]);
                 break;
             // TODO: FILL THE REST IN
             case "commit":
-                gitletCommit(args[1]);
+                commit(args[1]);
                 break;
             case "rm":
-                gitletrm(args[1]);
+                rm(args[1]);
                 break;
             case "log":
                 log();
@@ -43,25 +43,25 @@ public class Main {
                 globallog();
                 break;
             case "find":
-                find(args);
+                find(args[1]);
                 break;
             case "branch":
-                branch(args);
+                branch(args[1]);
                 break;
             case "rm-branch":
-                rmBranch(args);
+                rmBranch(args[1]);
                 break;
             case "status":
-                gitletStatus();
+                status();
                 break;
             case "checkout":
-                gitletCheckout(args);
+                checkout(args);
                 break;
             case "reset":
-                gitletreset(args);
+                reset(args[1]);
                 break;
             case "merge":
-                gitletmerge(args[1]);
+                merge(args[1]);
                 break;
             default:
                 System.err.println("No command with that name exists.");
