@@ -658,7 +658,7 @@ public class Repository {
         Commit headCommit = getCommit(head);
         Commit givenCommit = getCommit(branch);
 
-        TreeSet<String> fileSet = fileSet(splitCommit,headCommit,givenCommit);
+        TreeSet<String> fileSet = fileSet(splitCommit, headCommit, givenCommit);
         TreeMap<String, String> fileTochange = new TreeMap<>();
 
         for (String file : fileSet) {
