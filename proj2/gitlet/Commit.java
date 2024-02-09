@@ -211,14 +211,14 @@ public class Commit implements Serializable {
 
     /**Return a commit ID which is the splitPoint of Head and another branch when merging. */
     public static String splitPoint(String headID, String branchID) {
-        Collection<String> headParent = new TreeSet<>();
-        Queue<String> branchParent = new ArrayDeque<>();
-        headParent = getParents(headID, headParent);
-        branchParent = (Queue<String>) getParents(branchID, branchParent);
+        Collection<String> headParents = new TreeSet<>();
+        Queue<String> branchParents = new ArrayDeque<>();
+        headParents = getParents(headID, headParents);
+        branchParents = (Queue<String>) getParents(branchID, branchParents);
 
-        while (!branchParent.isEmpty()) {
-            String currentID = branchParent.poll();
-            if (headParent.contains(currentID)) {
+        while (!branchParents.isEmpty()) {
+            String currentID = branchParents.poll();
+            if (headParents.contains(currentID)) {
                 return currentID;
             }
         }

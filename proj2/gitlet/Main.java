@@ -2,10 +2,9 @@ package gitlet;
 import static gitlet.Repository.*;
 
 /** Driver class for Gitlet, a subset of the Git version-control system.
- *  @author TODO
+ *  @author liuguangyang
  */
 public class Main {
-
     /** Usage: java gitlet.Main ARGS, where ARGS contains
      *  <COMMAND> <OPERAND1> <OPERAND2> ... 
      */
@@ -22,14 +21,11 @@ public class Main {
         }
         switch(firstArg) {
             case "init":
-                // TODO: handle the `init` command
                 init();
                 break;
             case "add":
-                // TODO: handle the `add [filename]` command
                 add(args[1]);
                 break;
-            // TODO: FILL THE REST IN
             case "commit":
                 commit(args[1]);
                 break;

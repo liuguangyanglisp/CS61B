@@ -7,7 +7,7 @@ import static gitlet.Utils.*;
 
 /**
  * Represents a gitlet repository.
- * * The structure and command of the repository are mostly designed here.
+ * *The structure and command of the repository are mostly designed here.
  * *The structure of a Repository is as follows:
  * * .gitlet/ -- top level folder for all persistent data. located in my Proj2 folder.
  * *    - COMMIT_DIR/ -- folder containing all Commits.
@@ -28,9 +28,7 @@ public class Repository {
      * variable is used. We've provided two examples for you.
      */
 
-    /**
-     * The current working directory.
-     */
+    /**The current working directory.*/
     public static final File CWD = new File(System.getProperty("user.dir"));
     /**
      * The .gitlet directory.
@@ -642,15 +640,11 @@ public class Repository {
     }
 
     /**Return a set of files In multiple given commit ID.*/
-    private static TreeSet<String> fileSet(String... commitID) {
+    private static TreeSet<String> fileSet(Commit... commits) {
         TreeSet<String> fileSet = new TreeSet<>();
-        for (String id : commitID) {
-            Set<String> files = getCommit(id).fileNameSet();
-            if (files == null) {
-                continue;
-            }
-            for (String file : files) {
-                fileSet.add(file);
+        for (Commit commit : commits) {
+            if (commit != null && commit.fileNameSet() != null) {
+                fileSet.addAll(commit.fileNameSet());
             }
         }
         return fileSet;
@@ -660,12 +654,17 @@ public class Repository {
      * return a TreeMap containing files need to be changed.
      * key: fileName; value: "add", "rm" or "conflict".*/
     private static TreeMap<String, String> fileCheck(String split, String head, String branch) {
-        TreeSet<String> fileSet = fileSet(split, head, branch);
+        Commit splitCommit = getCommit(split);
+        Commit headCommit = getCommit(head);
+        Commit givenCommit = getCommit(branch);
+
+        TreeSet<String> fileSet = fileSet(splitCommit,headCommit,givenCommit);
         TreeMap<String, String> fileTochange = new TreeMap<>();
+
         for (String file : fileSet) {
-            String splitBlob = getCommit(split).getBlob(file);
-            String headBlob = getCommit(head).getBlob(file);
-            String givenBlob = getCommit(branch).getBlob(file);
+            String splitBlob = splitCommit.getBlob(file);
+            String headBlob = headCommit.getBlob(file);
+            String givenBlob = givenCommit.getBlob(file);
             /*1.Any files that have been modified in the given branch since the split point
             but not modified in the current branch
             since the split point should be changed to their versions in the given branch*/
