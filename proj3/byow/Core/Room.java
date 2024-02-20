@@ -11,28 +11,11 @@ public class Room {
     Positon positon;
     int width;
     int height;
-    static LinkedList<Room> roomList = new LinkedList<>();
 
     public Room(Positon positon, int width, int height) {
         this.positon = positon;
         this.width = width;
         this.height = height;
-    }
-
-    /*Generate random room in the world.
-    * Random location, width, height. */
-    public static Room generateRoom(TETile[][]world) {
-        Room randomRoom;
-        int x = 1 + getRandom().nextInt(getWidth() - 10);
-        int y = 1 + getRandom().nextInt(getHeight() - 10);
-        Positon randomPosition = new Positon(x, y);
-        int randomWidth = 3 + getRandom().nextInt(5);
-        int randomHeight = 3 + getRandom().nextInt(5);
-        randomRoom = new Room(randomPosition, randomWidth, randomHeight);
-        while (overlap(world, randomRoom)) {
-            randomRoom = generateRoom(world);
-        }
-        return randomRoom;
     }
 
     /*Return ture if room is overlap.*/

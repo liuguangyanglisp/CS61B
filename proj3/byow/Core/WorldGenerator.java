@@ -1,90 +1,93 @@
 package byow.Core;
-
-import byow.TileEngine.TERenderer;
 import byow.TileEngine.TETile;
 import byow.TileEngine.Tileset;
 
+import java.util.LinkedList;
 import java.util.Random;
+
+import static byow.Core.Room.overlap;
 
 
 public class WorldGenerator {
-    private static final int WIDTH = 100;
-    private static final int HEIGHT = 50;
+    private  int WIDTH;
+    private  int HEIGHT;
 
-    private static final long SEED = 588;
-    private static final Random RANDOM = new Random(SEED);
+    private  long SEED;
+    private  Random RANDOM;
 
-    public static void main(String[] args) {
-        TERenderer ter = new TERenderer();
-        ter.initialize(WIDTH, HEIGHT);
+    private TETile[][] world;
+    static LinkedList<Room> roomList = new LinkedList<>();
 
-        TETile[][] world = new TETile[WIDTH][HEIGHT];
-        fillWithNothing(world);
-        drawWorld(world);
-        ter.renderFrame(world);
+    public WorldGenerator(TETile[][] world, long seed) {
+        this.world = world;
+        this.WIDTH = world.length;
+        this.HEIGHT = world[0].length;
+
+        this.SEED = seed;
+        this.RANDOM = new Random(SEED);
     }
+
     /*Draw a world. */
-    public static void drawWorld(TETile[][]world) {
+    public void drawWorld() {
+        fillWithNothing();
         //draw random room with random width and length
-        drawManyRoom(world, 10 + RANDOM.nextInt(10));
+        drawManyRoom(10 + RANDOM.nextInt(10));
 
         //draw hallway to connect rooms.
-        drawHallway(world);
+        drawHallway();
 
         //draw wall to surround room and hallway.
-        drawWall(world);
+        drawWall();
     }
 
 
     /**
      * Fills the given 2D array of tiles with RANDOM tiles.
-     * @param tiles
      */
-    public static void fillWithNothing(TETile[][] tiles) {
-        int height = tiles[0].length;
-        int width = tiles.length;
-        for (int x = 0; x < width; x += 1) {
-            for (int y = 0; y < height; y += 1) {
-                tiles[x][y] = Tileset.NOTHING;
+    private void fillWithNothing() {
+        for (int x = 0; x < this.WIDTH; x += 1) {
+            for (int y = 0; y < this.HEIGHT; y += 1) {
+                world[x][y] = Tileset.NOTHING;
             }
         }
     }
+
     /*Draw a tile. */
-    public static void drawTile(TETile[][] world, Positon p, TETile tile) {
+    public void drawTile(Positon p, TETile tile) {
         world[p.x][p.y] = tile;
     }
 
     /*Draw a room.*/
-    public static void drawRoom(TETile[][] world, Room room) {
+    public void drawRoom(Room room) {
         for (int x = 0; x < room.width; x++) {
             for (int y = 0; y < room.height; y++) {
-                    drawTile(world, room.positon.move(x,y), Tileset.FLOOR);
+                    drawTile(room.positon.move(x,y), Tileset.FLOOR);
                 }
             }
-        Room.roomList.addFirst(room);
+        roomList.addFirst(room);
     }
 
     /*Draw n room randomly. */
-    public static void drawManyRoom(TETile[][] world, int n) {
+    public void drawManyRoom(int n) {
         if (n <= 0) {
             return;
         }
-        drawRoom(world, Room.generateRoom(world));
-        drawManyRoom(world, n - 1);
+        drawRoom(generateRoom());
+        drawManyRoom(n - 1);
     }
 
 
     /*Draw hallways to connect all the room. */
-    public static void drawHallway(TETile[][]world) {
-        for (int i = 0; i < Room.roomList.size() - 1; i++) {
-            Positon a = Room.roomList.get(i).positon;
-            Positon b = Room.roomList.get(i+1).positon;
-            connectRoom(world, a, b);
+    public void drawHallway() {
+        for (int i = 0; i < roomList.size() - 1; i++) {
+            Positon a = roomList.get(i).positon;
+            Positon b = roomList.get(i+1).positon;
+            connectRoom(a, b);
         }
     }
 
     /*Draw tile from start Position to end Position to connect two rooms. */
-    private static void connectRoom(TETile[][]world, Positon start, Positon end) {
+    private void connectRoom(Positon start, Positon end) {
         Positon p = start;
         while (p.x != end.x) {
             if (p.x < end.x) {
@@ -93,7 +96,7 @@ public class WorldGenerator {
             if (p.x > end.x) {
                 p = p.move(-1, 0);
             }
-            drawTile(world,p, Tileset.FLOOR);
+            drawTile(p, Tileset.FLOOR);
         }
 
         while (p.y != end.y) {
@@ -103,34 +106,35 @@ public class WorldGenerator {
             if (p.y > end.y) {
                 p = p.move(0, -1);
             }
-            drawTile(world,p, Tileset.FLOOR);
+            drawTile(p, Tileset.FLOOR);
         }
 
     }
 
     /*Draw wall to surround rooms and hallways. */
-    public static void drawWall(TETile[][] world) {
+    public void drawWall() {
         for (int i = 0; i < WIDTH; i ++) {
             for (int j = 0; j < HEIGHT; j ++) {
                if (world[i][j].equals(Tileset.FLOOR)) {
-                    buildWallAround(world, new Positon(i,j));
+                   Positon p = new Positon(i,j);
+                    buildWallAround(p);
                 }
             }
         }
     }
 
     /*draWall help function: build wall around a Position.*/
-    private static void buildWallAround (TETile[][] world, Positon p) {
+    private void buildWallAround (Positon p) {
         for (int x = -1; x <=1; x++) {
             for (int y = -1; y<=1; y++) {
                 Positon around = p.move(x, y);
-                fillNothingTowall(world, around);
+                fillNothingTowall(around);
             }
         }
     }
     /*draWall help function: if position p is nothing, fill nothing to wall.*/
-    private static boolean fillNothingTowall(TETile[][]world, Positon p) {
-        if (p.x < 0 || p.x >WIDTH-1 || p.y < 0 || p.y > HEIGHT - 1) {
+    private  boolean fillNothingTowall(Positon p) {
+        if (p.x < 0 || p.x >= WIDTH || p.y < 0 || p.y >= HEIGHT) {
             return false;
         }
         if (world[p.x][p.y].equals(Tileset.NOTHING)) {
@@ -139,17 +143,25 @@ public class WorldGenerator {
         }
         return false;
     }
-    /*Get width of world.*/
-    public static int getWidth() {
-        return WIDTH;
-    }
-    /*Get height of world.*/
-    public static int getHeight() {
-        return HEIGHT;
-    }
-    /*Get Random object. */
-    public static Random getRandom() {
-        return RANDOM;
+
+    /*Generate random room in the world.
+     * Random location, width, height. */
+    public Room generateRoom() {
+        Room randomRoom;
+        int x = 1 + RANDOM.nextInt(WIDTH - 10);
+        int y = 1 + RANDOM.nextInt(HEIGHT - 10);
+        Positon randomPosition = new Positon(x, y);
+        int randomWidth = 3 + RANDOM.nextInt(5);
+        int randomHeight = 3 + RANDOM.nextInt(5);
+        randomRoom = new Room(randomPosition, randomWidth, randomHeight);
+        while (overlap(world, randomRoom)) {
+            randomRoom = generateRoom();
+        }
+        return randomRoom;
     }
 
+    public TETile[][] getWorld(){
+        drawWorld();
+        return world;
+    }
 }
