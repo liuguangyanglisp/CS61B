@@ -3,16 +3,13 @@ package byow.Core;
 import byow.InputDemo.StringInputDevice;
 import byow.TileEngine.TERenderer;
 import byow.TileEngine.TETile;
-
-import java.util.Objects;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.Arrays;
 
 public class Engine {
     TERenderer ter = new TERenderer();
     /* Feel free to change the width and height. */
     public static final int WIDTH = 80;
-    public static final int HEIGHT = 40;
+    public static final int HEIGHT = 30;
 
     /**
      * Method used for exploring a fresh world. This method should handle all inputs,
@@ -52,8 +49,6 @@ public class Engine {
         //
         // See proj3.byow.InputDemo for a demo of how you can make a nice clean interface
         // that works for many different input types.
-        TERenderer ter = new TERenderer();
-        ter.initialize(WIDTH, HEIGHT);
         TETile[][] finalWorldFrame = new TETile[WIDTH][HEIGHT];
 
         //getSeed from input.
@@ -65,8 +60,8 @@ public class Engine {
 
         //generate world from TETile[][] and seed.
         WorldGenerator world = new WorldGenerator(finalWorldFrame, seed);
-
-        return world.getWorld();
+        finalWorldFrame = world.getWorld();
+        return finalWorldFrame;
     }
 
     private static String getSeed(String input) {
@@ -98,18 +93,28 @@ public class Engine {
         }
     }
 
-    public static void main(String[] args) {
+    /*public static void main(String[] args) {
         Engine x = new Engine();
         Engine y = new Engine();
-        TETile[][]xt = x.interactWithInputString("n234s");
-        TETile[][]yt = y.interactWithInputString("n234s");
+        TETile[][]xt = x.interactWithInputString("n5197880843569031643s");
+        TETile[][]yt = y.interactWithInputString("n5197880843569031643s");
+        if (Arrays.deepEquals(xt, yt)){
+            System.out.printf("2dequal");
+        }
 
+        for (int xx = 0; xx < WIDTH; xx++) {
+            for (int yy = 0; yy < HEIGHT; yy++) {
+                if (!xt[xx][yy].equals(yt[xx][yy])) {
+                    System.out.printf("not equal");
+                }
+            }
+        }
 
-        TERenderer ter = y.ter;
-        ter.initialize(WIDTH, HEIGHT);
-        ter.renderFrame(yt);
-    }
-
-
-
+        if (xt[0][0].equals(yt[0][0])) {
+            System.out.printf("1");
+        }
+        if (xt.equals(yt)) {
+            System.out.printf("1");
+        }
+    }*/
 }

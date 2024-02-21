@@ -1,30 +1,25 @@
 package byow.Core;
 import byow.TileEngine.TETile;
 import byow.TileEngine.Tileset;
-
 import java.util.LinkedList;
 import java.util.Random;
-
 import static byow.Core.Room.overlap;
 
 
 public class WorldGenerator {
-    private  int WIDTH;
-    private  int HEIGHT;
+    private final int WIDTH;
+    private final int HEIGHT;
 
-    private  long SEED;
-    private  Random RANDOM;
+    private final Random RANDOM;
 
-    private TETile[][] world;
-    static LinkedList<Room> roomList = new LinkedList<>();
+    private final TETile[][] world;
+    private final LinkedList<Room> roomList = new LinkedList<>();
 
     public WorldGenerator(TETile[][] world, long seed) {
         this.world = world;
         this.WIDTH = world.length;
         this.HEIGHT = world[0].length;
-
-        this.SEED = seed;
-        this.RANDOM = new Random(SEED);
+        this.RANDOM = new Random(seed);
     }
 
     /*Draw a world. */

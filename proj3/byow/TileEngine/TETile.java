@@ -2,6 +2,7 @@ package byow.TileEngine;
 
 import java.awt.Color;
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.Random;
 
 import edu.princeton.cs.introcs.StdDraw;
@@ -189,4 +190,47 @@ public class TETile {
 
         return copy;
     }
+
+    /*@Override
+    public boolean equals(Object obj) {
+        // Check if the reference is the same
+        if (this == obj) {
+            return true;
+        }
+
+        // Check if the object is null or of a different class
+        if (obj == null || getClass() != obj.getClass()) {
+            return false;
+        }
+        TETile tile = (TETile) obj;
+
+        if (this.character != tile.character) {
+            return false;
+        }
+        if (!this.textColor.equals(tile.textColor)) {
+            return false;
+        }
+        if (!this.backgroundColor.equals(tile.backgroundColor)) {
+            return false;
+        }
+        
+        if (!this.description.equals(tile.description)) {
+            return false;
+        }
+        if (this.filepath == null) {
+            if (tile.filepath != null) {
+                return false;
+            }
+        } else if (!this.filepath.equals(tile.filepath)) {
+                return false;
+            }
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(this.character, this.textColor, this.backgroundColor, this.description, this.filepath);
+    }*/
+
+
 }

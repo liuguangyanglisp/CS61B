@@ -3,10 +3,6 @@ package byow.Core;
 import byow.TileEngine.TETile;
 import byow.TileEngine.Tileset;
 
-import java.util.LinkedList;
-
-import static byow.Core.WorldGenerator.*;
-
 public class Room {
     Positon positon;
     int width;

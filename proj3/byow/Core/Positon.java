@@ -13,9 +13,4 @@ public class Positon {
         Positon newPositon = new Positon(this.x + x, this.y + y);
         return newPositon;
     }
-    /*Move a position x and y ordinate.*/
-    public static void move (Positon p, int x, int y) {
-        p.x = p.x + x;
-        p.y = p.y + y;
-    }
 }
