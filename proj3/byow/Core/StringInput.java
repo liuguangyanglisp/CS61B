@@ -32,8 +32,6 @@ public class StringInput implements InputSource{
                 gameCommand += key;
                 if (key == 'S') {
                     tiles = generateTiles(gameCommand);
-                    ter.initialize(WIDTH, HEIGHT);
-                    ter.renderFrame(tiles);
                     saveGame("string.txt", gameCommand);
                 }
             }
@@ -42,8 +40,6 @@ public class StringInput implements InputSource{
                 if (gameCommandInfile.length() > 3) {
                     gameCommand = gameCommandInfile;
                     tiles = generateTiles(gameCommandInfile);
-                    ter.initialize(WIDTH, HEIGHT);
-                    ter.renderFrame(tiles);
                     saveGame("string.txt", gameCommand);
                 }
             }
@@ -52,9 +48,8 @@ public class StringInput implements InputSource{
         if (tiles != null) {
             if (key == 'S' || key == 'W' || key == 'A' || key == 'D') {
                 gameCommand += key;
-                saveGame("string.txt", gameCommand);
                 tiles = movePlayer(tiles, key);
-                ter.renderFrame(tiles);
+                saveGame("string.txt", gameCommand);
             }
         }
 
