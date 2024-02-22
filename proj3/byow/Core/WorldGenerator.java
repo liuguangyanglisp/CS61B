@@ -7,19 +7,20 @@ import static byow.Core.Room.overlap;
 
 
 public class WorldGenerator {
-    private final int WIDTH;
-    private final int HEIGHT;
+    private  int WIDTH;
+    private  int HEIGHT;
 
-    private final Random RANDOM;
+    private  Random RANDOM;
 
-    private final TETile[][] world;
-    private final LinkedList<Room> roomList = new LinkedList<>();
+    private  TETile[][] world;
+    private  LinkedList<Room> roomList = new LinkedList<>();
 
     public WorldGenerator(TETile[][] world, long seed) {
         this.world = world;
         this.WIDTH = world.length;
         this.HEIGHT = world[0].length;
         this.RANDOM = new Random(seed);
+        drawWorld();
     }
 
     /*Draw a world. */
@@ -33,8 +34,21 @@ public class WorldGenerator {
 
         //draw wall to surround room and hallway.
         drawWall();
+        drawPlayer();
     }
 
+    /*Draw a random avatar which can move by player. */
+    private void drawPlayer() {
+        while (true) {
+            int x = RANDOM.nextInt(WIDTH);
+            int y = RANDOM.nextInt(HEIGHT);
+            if (world[x][y].equals(Tileset.FLOOR)) {
+                Positon a = new Positon(x, y);
+                drawTile(a, Tileset.AVATAR);
+                return;
+            }
+        }
+    }
 
     /**
      * Fills the given 2D array of tiles with RANDOM tiles.
@@ -156,7 +170,36 @@ public class WorldGenerator {
     }
 
     public TETile[][] getWorld(){
-        drawWorld();
+        return world;
+    }
+
+    public static TETile[][] movePlayer(TETile[][] world, char direction) {
+        Positon player = new Positon(0, 0);
+        for (int x = 0; x < world.length; x++ ) {
+            for (int y = 0; y < world[0].length; y++) {
+                if (world[x][y].equals(Tileset.AVATAR)) {
+                    player = new Positon(x, y);
+                    break;
+                }
+            }
+        }
+        Positon moveTo = player;
+        if (direction == 'W') {
+            moveTo = player.move(0, 1);
+        } else if (direction == 'S') {
+            moveTo = player.move(0, -1);
+        } else if (direction == 'A') {
+            moveTo = player.move(-1, 0);
+        } else if (direction == 'D') {
+            moveTo = player.move(1, 0);
+        }
+        if (moveTo.x < 0 || moveTo.x >= world.length || moveTo.y < 0 || moveTo.y >= world.length) {
+            return world;
+        }
+        if (world[moveTo.x][moveTo.y].equals(Tileset.FLOOR)) {
+            world[moveTo.x][moveTo.y] = Tileset.AVATAR;
+           world[player.x][player.y] = Tileset.FLOOR;
+        }
         return world;
     }
 }

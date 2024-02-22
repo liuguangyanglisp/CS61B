@@ -1,23 +1,115 @@
 package byow.Core;
 
+import byow.InputDemo.KeyboardInputSource;
 import byow.InputDemo.StringInputDevice;
 import byow.TileEngine.TERenderer;
 import byow.TileEngine.TETile;
-import java.util.Arrays;
+import com.google.common.io.ByteProcessor;
+import com.google.common.io.Files;
+import edu.princeton.cs.introcs.StdDraw;
+
+import java.awt.*;
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
+import java.util.List;
+
+import static byow.Core.WorldGenerator.movePlayer;
+import static byow.TileEngine.TERenderer.getTileSize;
 
 public class Engine {
     TERenderer ter = new TERenderer();
     /* Feel free to change the width and height. */
-    public static final int WIDTH = 80;
-    public static final int HEIGHT = 30;
+    public static final int WIDTH = 100;
+    public static final int HEIGHT = 40;
+
+    public static void main(String[] args) throws IOException {
+        Engine e = new Engine();
+        /*e.interactWithInputString("N999SDDDWWWDDD");*/
+        /*e.interactWithInputString("N999SDDD:Q");
+        e.interactWithInputString("LWWWDDD");*/
+
+        /*e.interactWithInputString("N999SDDD:Q");
+        e.interactWithInputString("LWWW:Q");
+        e.interactWithInputString("LDDD:Q");*/
+
+        e.interactWithInputString("N999SDDD:Q");
+        e.interactWithInputString("L:Q");
+        e.interactWithInputString("L:Q");
+        e.interactWithInputString("LWWWDDD");
+
+
+    }
 
     /**
      * Method used for exploring a fresh world. This method should handle all inputs,
      * including inputs from the main menu.
      */
-    public void interactWithKeyboard() {
+    public void interactWithKeyboard() throws IOException {
+        char secondLastKey = 0;
+        InputSource inputSource = new KeyboardInput();
+        while (inputSource.possibleNextInput()) {
+            char lastKey = inputSource.getNextKey();
+            if (secondLastKey == ':' && lastKey == 'Q') {
+                return;
+            }
+            secondLastKey = lastKey;
+        }
+    }
 
 
+    /*Return a random 2D TETile according String begin with N.*/
+    public static TETile[][] generateTiles(String input) {
+        TETile[][] tiles = generateTilesFromNtoS(input);
+
+        //Move TETile according move chars.
+        int indexOfS = input.indexOf("S");
+        String stringAfterS = input.substring(indexOfS);
+        tiles = moveTilesFromWSAD(tiles, stringAfterS);
+
+        return tiles;
+    }
+
+    public static TETile[][] generateTilesFromNtoS(String input) {
+        int indexOfS = input.indexOf("S");
+        //build 2D TETile according number from N to S;
+        long seed = Long.parseLong(input.substring(1, indexOfS));
+        TETile[][] world = new TETile[WIDTH][HEIGHT - 3];
+        WorldGenerator worldGen = new WorldGenerator(world, seed);
+        return worldGen.getWorld();
+    }
+
+    public static TETile[][] moveTilesFromWSAD(TETile[][] tiles, String input) {
+        char lastSecondKey = 0;
+        for (int n = 0; n < input.length(); n ++) {
+            char key = input.charAt(n);
+            if (key == 'W' || key =='S' || key == 'A' || key == 'D') {
+                tiles = movePlayer(tiles, key);
+            }
+            if (lastSecondKey == ':' && key == 'Q') {
+                return tiles;
+            }
+            lastSecondKey = key;
+        }
+        return tiles;
+
+    }
+
+    public static void saveGame(String txtFileName, String gameCommand) throws IOException {
+        File txtFile = new File(txtFileName);
+        Files.write(gameCommand, txtFile, StandardCharsets.UTF_8);
+    }
+
+    public static String readGame(String txtFileName) throws IOException {
+        File txtFile = new File(txtFileName);
+        if (!txtFile.exists()) {
+            return "";
+        }
+        List<String> gameCommandList = Files.readLines(txtFile, StandardCharsets.UTF_8);
+        String command = String.join("", gameCommandList);
+        return command;
     }
 
     /**
@@ -41,80 +133,25 @@ public class Engine {
      * @param input the input string to feed to your program
      * @return the 2D TETile[][] representing the state of the world
      */
-    public TETile[][] interactWithInputString(String input) {
-        // TODO: Fill out this method so that it run the engine using the input
+    public TETile[][] interactWithInputString(String input) throws IOException {
+        // Fill out this method so that it run the engine using the input
         // passed in as an argument, and return a 2D tile representation of the
         // world that would have been drawn if the same inputs had been given
         // to interactWithKeyboard().
         //
         // See proj3.byow.InputDemo for a demo of how you can make a nice clean interface
         // that works for many different input types.
-        TETile[][] finalWorldFrame = new TETile[WIDTH][HEIGHT];
-
-        //getSeed from input.
-        String seedString = getSeed(input);
-        if (seedString == null) {
-            return null;
-        }
-        long seed = Long.parseLong(seedString);
-
-        //generate world from TETile[][] and seed.
-        WorldGenerator world = new WorldGenerator(finalWorldFrame, seed);
-        finalWorldFrame = world.getWorld();
-        return finalWorldFrame;
-    }
-
-    private static String getSeed(String input) {
-        StringInputDevice device = new StringInputDevice(input);
-        String result = "";
-
-        //get a sting like "N###S" format, which begins with N/n, has digit in the middle,
-        //and end with S/s.
-        while (device.possibleNextInput()) {
-            char key = device.getNextKey();
-            if (key == 'n' || key == 'N') {
-                result = "N";
-            } else if (result.length() >= 1 && Character.isDigit(key)) {
-                result += key;
-            } else if (result.length() >= 2 && (key == 's' || key == 'S')) {
-                result += key;
+        char secondLastKey = 0;
+        InputSource inputSource = new StringInput(input);
+        while (inputSource.possibleNextInput()) {
+            char lastKey = inputSource.getNextKey();
+            if (secondLastKey == ':' && lastKey == 'Q') {
                 break;
-            } else {
-                result = "";
             }
+            secondLastKey = lastKey;
+        }
+        String stringInFile = readGame("string.txt");
+        return generateTiles(stringInFile);
         }
 
-        //retrieve digit from the string.
-        if (result.length() >= 3) {
-            result = result.substring(1, result.length() - 1);
-            return result;
-        } else {
-            return null;
-        }
-    }
-
-    /*public static void main(String[] args) {
-        Engine x = new Engine();
-        Engine y = new Engine();
-        TETile[][]xt = x.interactWithInputString("n5197880843569031643s");
-        TETile[][]yt = y.interactWithInputString("n5197880843569031643s");
-        if (Arrays.deepEquals(xt, yt)){
-            System.out.printf("2dequal");
-        }
-
-        for (int xx = 0; xx < WIDTH; xx++) {
-            for (int yy = 0; yy < HEIGHT; yy++) {
-                if (!xt[xx][yy].equals(yt[xx][yy])) {
-                    System.out.printf("not equal");
-                }
-            }
-        }
-
-        if (xt[0][0].equals(yt[0][0])) {
-            System.out.printf("1");
-        }
-        if (xt.equals(yt)) {
-            System.out.printf("1");
-        }
-    }*/
 }
