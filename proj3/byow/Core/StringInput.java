@@ -19,7 +19,7 @@ public class StringInput implements InputSource{
     }
 
     public char getNextKey() {
-        char key = input.charAt(index);
+        char key = Character.toUpperCase(input.charAt(index));
         if (tiles == null) {
             int length = gameCommand.length();
             if ((length == 0 && key == 'N')
