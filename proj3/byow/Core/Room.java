@@ -16,8 +16,8 @@ public class Room {
 
     /*Return ture if room is overlap.*/
     public static boolean overlap(TETile[][] world, Room room) {
-        for (int x = room.positon.x; x < room.positon.x + room.width; x++) {
-            for (int y = room.positon.y; y < room.positon.y + room.height; y++) {
+        for (int x = room.positon.getX(); x < room.positon.getX() + room.width; x++) {
+            for (int y = room.positon.getY(); y < room.positon.getY() + room.height; y++) {
                 if (world[x][y] != Tileset.NOTHING) {
                     return true;
                 }

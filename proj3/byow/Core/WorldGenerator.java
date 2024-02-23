@@ -66,7 +66,7 @@ public class WorldGenerator {
 
     /*Draw a tile. */
     public void drawTile(Positon p, TETile tile) {
-        world[p.x][p.y] = tile;
+        world[p.getX()][p.getY()] = tile;
     }
 
     /*Draw a room.*/
@@ -101,21 +101,19 @@ public class WorldGenerator {
     /*Draw tile from start Position to end Position to connect two rooms. */
     private void connectRoom(Positon start, Positon end) {
         Positon p = start;
-        while (p.x != end.x) {
-            if (p.x < end.x) {
+        while (p.getX() != end.getX()) {
+            if (p.getX() < end.getX()) {
                 p = p.move(1, 0);
-            }
-            if (p.x > end.x) {
+            } else {
                 p = p.move(-1, 0);
             }
             drawTile(p, Tileset.FLOOR);
         }
 
-        while (p.y != end.y) {
-            if (p.y < end.y) {
+        while (p.getY()!= end.getY()) {
+            if (p.getY() < end.getY()) {
                 p = p.move(0, 1);
-            }
-            if (p.y > end.y) {
+            } else {
                 p = p.move(0, -1);
             }
             drawTile(p, Tileset.FLOOR);
@@ -147,11 +145,13 @@ public class WorldGenerator {
 
     /*draWall help function: if position p is nothing, fill nothing to wall.*/
     private boolean fillNothingTowall(Positon p) {
-        if (p.x < 0 || p.x >= WIDTH || p.y < 0 || p.y >= HEIGHT) {
+        int px = p.getX();
+        int py = p.getY();
+        if (px < 0 || px >= WIDTH || py < 0 || py >= HEIGHT) {
             return false;
         }
-        if (world[p.x][p.y].equals(Tileset.NOTHING)) {
-            world[p.x][p.y] = Tileset.WALL;
+        if (world[px][py].equals(Tileset.NOTHING)) {
+            world[px][py] = Tileset.WALL;
             return true;
         }
         return false;
@@ -201,12 +201,15 @@ public class WorldGenerator {
         } else if (direction == 'D') {
             moveTo = player.move(1, 0);
         }
-        if (moveTo.x < 0 || moveTo.x >= world.length || moveTo.y < 0 || moveTo.y >= world.length) {
+
+        int mx = moveTo.getX();
+        int my = moveTo.getY();
+        if (mx < 0 || mx >= world.length || my < 0 || my >= world.length) {
             return world;
         }
-        if (world[moveTo.x][moveTo.y].equals(Tileset.FLOOR)) {
-            world[moveTo.x][moveTo.y] = Tileset.AVATAR;
-            world[player.x][player.y] = Tileset.FLOOR;
+        if (world[mx][my].equals(Tileset.FLOOR)) {
+            world[mx][my] = Tileset.AVATAR;
+            world[player.getX()][player.getY()] = Tileset.FLOOR;
         }
         return world;
     }

@@ -3,7 +3,6 @@ package byow.TileEngine;
 import java.awt.Color;
 import java.io.Serializable;
 import java.util.Arrays;
-import java.util.Objects;
 import java.util.Random;
 
 import edu.princeton.cs.introcs.StdDraw;
