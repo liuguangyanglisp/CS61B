@@ -9,7 +9,8 @@ public class StringInput implements InputSource{
     private String input;
     private int index;
 
-    private TETile[][] tiles;
+    private TETile[][] tiles = null;
+    private static TETile[][] saveTiles = null;
 
     private String gameCommand = "";
 
@@ -28,24 +29,29 @@ public class StringInput implements InputSource{
                 gameCommand += key;
                 if (key == 'S') {
                     tiles = generateTiles(gameCommand);
-                    saveGame("string.txt", gameCommand);
+                    saveTiles = tiles;
+                    /*saveGame("string.txt", gameCommand);*/
                 }
             }
             if (length == 0 && key == 'L') {
-                String gameCommandInfile = readGame("string.txt");
+                tiles = saveTiles;
+                }
+
+                /*String gameCommandInfile = readGame("string.txt");
                 if (gameCommandInfile.length() > 3) {
                     gameCommand = gameCommandInfile;
                     tiles = generateTiles(gameCommandInfile);
                     saveGame("string.txt", gameCommand);
-                }
-            }
+                }*/
+
         }
 
         if (tiles != null) {
             if (key == 'S' || key == 'W' || key == 'A' || key == 'D') {
                 gameCommand += key;
                 tiles = movePlayer(tiles, key);
-                saveGame("string.txt", gameCommand);
+                saveTiles = tiles;
+                /*saveGame("string.txt", gameCommand);*/
             }
         }
 

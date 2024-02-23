@@ -24,14 +24,17 @@ public class Engine {
         /*e.interactWithInputString("N999SDDD:Q");
         e.interactWithInputString("LWWWDDD");*/
 
-        /*e.interactWithInputString("N999SDDD:Q");
-        e.interactWithInputString("LWWW:Q");
-        e.interactWithInputString("LDDD:Q");*/
+        /*TETile[][] t = e.interactWithInputString("N999SDDD:Q");
+        t = e.interactWithInputString("LWWW:Q");
+        t = e.interactWithInputString("LDDD:Q");*/
 
-        /*e.interactWithInputString("N999SDDD:Q");
-        e.interactWithInputString("L:Q");
-        e.interactWithInputString("L:Q");
-        e.interactWithInputString("LWWWDDD");*/
+        /*TETile[][] t = e.interactWithInputString("N999SDDD:Q");
+        t = e.interactWithInputString("L:Q");
+        t = e.interactWithInputString("L:Q");
+        t = e.interactWithInputString("LWWWDDD");*/
+
+        /*e.ter.initialize(WIDTH, HEIGHT);
+        e.ter.renderFrame(t);*/
 
         /*TETile[][] a = generateTiles("n5197880843569031643s");
         TETile[][] b = e.interactWithInputString("n5197880843569031643s");
@@ -51,10 +54,9 @@ public class Engine {
         }
         if (Arrays.deepEquals(a, b)) {
             System.out.printf("1");
-        }
+        }*/
 
-        e.ter.initialize(WIDTH, HEIGHT);
-        e.ter.renderFrame(b);*/
+
     }
 
     /**
