@@ -1,15 +1,12 @@
 package byow.Core;
-
 import byow.TileEngine.TERenderer;
 import byow.TileEngine.TETile;
 import edu.princeton.cs.introcs.StdDraw;
-
 import java.awt.*;
-
 import static byow.Core.Engine.*;
 import static byow.Core.WorldGenerator.movePlayer;
 
-public class KeyboardInput implements InputSource{
+public class KeyboardInput implements InputSource {
     /*private static final boolean PRINT_TYPED_KEYS = false;*/
     private String gameCommand = "";
     private int width = Engine.WIDTH * 10;
@@ -18,9 +15,10 @@ public class KeyboardInput implements InputSource{
 
     private TETile[][] tiles = null;
 
-    public KeyboardInput( ) {
+    public KeyboardInput() {
         displayMenu();
     }
+
     @Override
     public char getNextKey() {
         while (true) {
@@ -85,6 +83,10 @@ public class KeyboardInput implements InputSource{
         return tiles;
     }
 
+    /*display a Main Menu that provides at LEAST the options:
+    to start a new world,
+    load a previously saved world,
+    and quit. */
     private void displayMenu() {
         StdDraw.setCanvasSize(width, height);
         StdDraw.setXscale(0, width);
@@ -94,20 +96,21 @@ public class KeyboardInput implements InputSource{
         Font font = new Font("Monaco", Font.BOLD, 30);
         Font titleFont = new Font("Monaco", Font.BOLD, 60);
         StdDraw.setFont(titleFont);
-        StdDraw.text(width/2, height/2  + 3 * titleFont.getSize(), "CS61B: THE GAME");
+        StdDraw.text(width / 2, height / 2 + 3 * titleFont.getSize(), "CS61B: THE GAME");
         StdDraw.setFont(font);
-        StdDraw.text(width/2, height/2 + font.getSize(), "New Game (N)");
-        StdDraw.text(width/2, height/2, "Load Game (L)");
-        StdDraw.text(width/2, height/2- font.getSize(), "Quit (Q)");
+        StdDraw.text(width / 2, height / 2 + font.getSize(), "New Game (N)");
+        StdDraw.text(width / 2, height / 2, "Load Game (L)");
+        StdDraw.text(width / 2, height / 2 - font.getSize(), "Quit (Q)");
         StdDraw.enableDoubleBuffering();
         StdDraw.show();
     }
 
+    /*show String in menu. */
     private void prompt(String s, int textSize) {
         StdDraw.clear(Color.black);
         Font font = new Font("Monaco", Font.BOLD, textSize);
         StdDraw.setFont(font);
-        StdDraw.text(width/2, height/2, s);
+        StdDraw.text(width / 2, height / 2, s);
         StdDraw.show();
     }
 }

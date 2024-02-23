@@ -1,19 +1,22 @@
 package byow.Core;
+
 import byow.TileEngine.TETile;
 import byow.TileEngine.Tileset;
+
 import java.util.LinkedList;
 import java.util.Random;
+
 import static byow.Core.Room.overlap;
 
 
 public class WorldGenerator {
-    private  int WIDTH;
-    private  int HEIGHT;
+    private int WIDTH;
+    private int HEIGHT;
 
-    private  Random RANDOM;
+    private Random RANDOM;
 
-    private  TETile[][] world;
-    private  LinkedList<Room> roomList = new LinkedList<>();
+    private TETile[][] world;
+    private LinkedList<Room> roomList = new LinkedList<>();
 
     public WorldGenerator(TETile[][] world, long seed) {
         this.world = world;
@@ -70,9 +73,9 @@ public class WorldGenerator {
     public void drawRoom(Room room) {
         for (int x = 0; x < room.width; x++) {
             for (int y = 0; y < room.height; y++) {
-                    drawTile(room.positon.move(x,y), Tileset.FLOOR);
-                }
+                drawTile(room.positon.move(x, y), Tileset.FLOOR);
             }
+        }
         roomList.addFirst(room);
     }
 
@@ -90,7 +93,7 @@ public class WorldGenerator {
     public void drawHallway() {
         for (int i = 0; i < roomList.size() - 1; i++) {
             Positon a = roomList.get(i).positon;
-            Positon b = roomList.get(i+1).positon;
+            Positon b = roomList.get(i + 1).positon;
             connectRoom(a, b);
         }
     }
@@ -122,10 +125,10 @@ public class WorldGenerator {
 
     /*Draw wall to surround rooms and hallways. */
     public void drawWall() {
-        for (int i = 0; i < WIDTH; i ++) {
-            for (int j = 0; j < HEIGHT; j ++) {
-               if (world[i][j].equals(Tileset.FLOOR)) {
-                   Positon p = new Positon(i,j);
+        for (int i = 0; i < WIDTH; i++) {
+            for (int j = 0; j < HEIGHT; j++) {
+                if (world[i][j].equals(Tileset.FLOOR)) {
+                    Positon p = new Positon(i, j);
                     buildWallAround(p);
                 }
             }
@@ -133,16 +136,17 @@ public class WorldGenerator {
     }
 
     /*draWall help function: build wall around a Position.*/
-    private void buildWallAround (Positon p) {
-        for (int x = -1; x <=1; x++) {
-            for (int y = -1; y<=1; y++) {
+    private void buildWallAround(Positon p) {
+        for (int x = -1; x <= 1; x++) {
+            for (int y = -1; y <= 1; y++) {
                 Positon around = p.move(x, y);
                 fillNothingTowall(around);
             }
         }
     }
+
     /*draWall help function: if position p is nothing, fill nothing to wall.*/
-    private  boolean fillNothingTowall(Positon p) {
+    private boolean fillNothingTowall(Positon p) {
         if (p.x < 0 || p.x >= WIDTH || p.y < 0 || p.y >= HEIGHT) {
             return false;
         }
@@ -169,13 +173,15 @@ public class WorldGenerator {
         return randomRoom;
     }
 
-    public TETile[][] getWorld(){
+    public TETile[][] getWorld() {
         return world;
     }
 
     public static TETile[][] movePlayer(TETile[][] world, char direction) {
         Positon player = new Positon(0, 0);
-        for (int x = 0; x < world.length; x++ ) {
+
+        //Find the player position. not an efficient algrithm.
+        for (int x = 0; x < world.length; x++) {
             for (int y = 0; y < world[0].length; y++) {
                 if (world[x][y].equals(Tileset.AVATAR)) {
                     player = new Positon(x, y);
@@ -184,6 +190,8 @@ public class WorldGenerator {
             }
         }
         Positon moveTo = player;
+
+        // move player.
         if (direction == 'W') {
             moveTo = player.move(0, 1);
         } else if (direction == 'S') {
@@ -198,7 +206,7 @@ public class WorldGenerator {
         }
         if (world[moveTo.x][moveTo.y].equals(Tileset.FLOOR)) {
             world[moveTo.x][moveTo.y] = Tileset.AVATAR;
-           world[player.x][player.y] = Tileset.FLOOR;
+            world[player.x][player.y] = Tileset.FLOOR;
         }
         return world;
     }

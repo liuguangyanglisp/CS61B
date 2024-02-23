@@ -5,7 +5,7 @@ import byow.TileEngine.TETile;
 import static byow.Core.Engine.*;
 import static byow.Core.WorldGenerator.movePlayer;
 
-public class StringInput implements InputSource{
+public class StringInput implements InputSource {
     private String input;
     private int index;
 
@@ -30,20 +30,11 @@ public class StringInput implements InputSource{
                 if (key == 'S') {
                     tiles = generateTiles(gameCommand);
                     saveTiles = tiles;
-                    /*saveGame("string.txt", gameCommand);*/
                 }
             }
             if (length == 0 && key == 'L') {
                 tiles = saveTiles;
-                }
-
-                /*String gameCommandInfile = readGame("string.txt");
-                if (gameCommandInfile.length() > 3) {
-                    gameCommand = gameCommandInfile;
-                    tiles = generateTiles(gameCommandInfile);
-                    saveGame("string.txt", gameCommand);
-                }*/
-
+            }
         }
 
         if (tiles != null) {
@@ -51,7 +42,6 @@ public class StringInput implements InputSource{
                 gameCommand += key;
                 tiles = movePlayer(tiles, key);
                 saveTiles = tiles;
-                /*saveGame("string.txt", gameCommand);*/
             }
         }
 

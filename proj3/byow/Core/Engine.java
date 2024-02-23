@@ -1,9 +1,10 @@
 package byow.Core;
+
 import byow.TileEngine.TERenderer;
 import byow.TileEngine.TETile;
+
 import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 
 import static byow.Core.WorldGenerator.movePlayer;
 
@@ -14,69 +15,24 @@ public class Engine {
     public static final int WIDTH = 100;
     public static final int HEIGHT = 40;
 
-    public static void main(String[] args)  {
-        Engine e = new Engine();
-
-
-
-        /*e.interactWithKeyboard();*/
-        /*e.interactWithInputString("N999SDDDWWWDDD");*/
-        /*e.interactWithInputString("N999SDDD:Q");
-        e.interactWithInputString("LWWWDDD");*/
-
-        /*TETile[][] t = e.interactWithInputString("N999SDDD:Q");
-        t = e.interactWithInputString("LWWW:Q");
-        t = e.interactWithInputString("LDDD:Q");*/
-
-        /*TETile[][] t = e.interactWithInputString("N999SDDD:Q");
-        t = e.interactWithInputString("L:Q");
-        t = e.interactWithInputString("L:Q");
-        t = e.interactWithInputString("LWWWDDD");*/
-
-        /*e.ter.initialize(WIDTH, HEIGHT);
-        e.ter.renderFrame(t);*/
-
-        /*TETile[][] a = generateTiles("n5197880843569031643s");
-        TETile[][] b = e.interactWithInputString("n5197880843569031643s");
-        for (int x =0; x < a.length; x++) {
-            for (int y = 0; y < a[0].length; y++) {
-                if (a[x][y] == null) {
-                    System.out.printf("anull");
-                }
-                if (b[x][y] == null) {
-                    System.out.printf("bnull");
-                }
-                if (!a[x][y].equals(b[x][y])) {
-                    System.out.printf("notEqual");
-                }
-
-            }
-        }
-        if (Arrays.deepEquals(a, b)) {
-            System.out.printf("1");
-        }*/
-
-
-    }
-
     /**
      * Method used for exploring a fresh world. This method should handle all inputs,
      * including inputs from the main menu.
      */
     public void interactWithKeyboard() {
-            char secondLastKey = 0;
-            InputSource inputSource = new KeyboardInput();
-            while (inputSource.possibleNextInput()) {
-                char lastKey = inputSource.getNextKey();
-                if (secondLastKey == ':' && lastKey == 'Q') {
-                    return;
-                }
-                secondLastKey = lastKey;
+        char secondLastKey = 0;
+        InputSource inputSource = new KeyboardInput();
+        while (inputSource.possibleNextInput()) {
+            char lastKey = inputSource.getNextKey();
+            if (secondLastKey == ':' && lastKey == 'Q') {
+                return;
             }
+            secondLastKey = lastKey;
+        }
     }
 
 
-    /*Return a random 2D TETile according String begin with N.*/
+    /*Return 2D TETile  from the input. */
     public static TETile[][] generateTiles(String input) {
         TETile[][] tiles = generateTilesFromNtoS(input);
 
@@ -89,8 +45,10 @@ public class Engine {
         return tiles;
     }
 
+    /*Return 2D TETile from the number in the input(between N to S). */
+
     public static TETile[][] generateTilesFromNtoS(String input) {
-        if (input== null || input.isBlank()) {
+        if (input == null || input.isBlank()) {
             return null;
         }
 
@@ -99,10 +57,10 @@ public class Engine {
 
         for (int i = 0; i < input.length(); i++) {
             char key = input.charAt(i);
-            if (indexOfN == -1 && (key == 'N' || key == 'n') ) {
+            if (indexOfN == -1 && (key == 'N' || key == 'n')) {
                 indexOfN = i;
             }
-            if (indexOfS == -1 && (key == 'S' || key == 's') ) {
+            if (indexOfS == -1 && (key == 'S' || key == 's')) {
                 indexOfS = i;
             }
         }
@@ -119,11 +77,12 @@ public class Engine {
         return world;
     }
 
+    /*Move tiles according the moving input string, include W/S/A/D. */
     public static TETile[][] moveTilesFromWSAD(TETile[][] tiles, String input) {
         char lastSecondKey = 0;
-        for (int n = 0; n < input.length(); n ++) {
+        for (int n = 0; n < input.length(); n++) {
             char key = input.charAt(n);
-            if (key == 'W' || key =='S' || key == 'A' || key == 'D') {
+            if (key == 'W' || key == 'S' || key == 'A' || key == 'D') {
                 tiles = movePlayer(tiles, key);
             }
             if (lastSecondKey == ':' && key == 'Q') {
@@ -135,6 +94,7 @@ public class Engine {
 
     }
 
+    /*Save string into local file.*/
     public static void saveGame(String txtFileName, String gameCommand) {
         File txtFile = new File(txtFileName);
         if (!txtFile.isFile()) {
@@ -150,6 +110,7 @@ public class Engine {
         }
     }
 
+    /*Read string from local file.*/
     public static String readGame(String txtFileName) {
         File file = new File(txtFileName);
         if (!file.isFile()) {
@@ -167,18 +128,18 @@ public class Engine {
      * of characters (for example, "n123sswwdasdassadwas", "n123sss:q", "lwww". The engine should
      * behave exactly as if the user typed these characters into the engine using
      * interactWithKeyboard.
-     *
+     * <p>
      * Recall that strings ending in ":q" should cause the game to quite save. For example,
      * if we do interactWithInputString("n123sss:q"), we expect the game to run the first
      * 7 commands (n123sss) and then quit and save. If we then do
      * interactWithInputString("l"), we should be back in the exact same state.
-     *
+     * <p>
      * In other words, both of these calls:
-     *   - interactWithInputString("n123sss:q")
-     *   - interactWithInputString("lww")
-     *
+     * - interactWithInputString("n123sss:q")
+     * - interactWithInputString("lww")
+     * <p>
      * should yield the exact same world state as:
-     *   - interactWithInputString("n123sssww")
+     * - interactWithInputString("n123sssww")
      *
      * @param input the input string to feed to your program
      * @return the 2D TETile[][] representing the state of the world
@@ -191,15 +152,15 @@ public class Engine {
         //
         // See proj3.byow.InputDemo for a demo of how you can make a nice clean interface
         // that works for many different input types.
-            char secondLastKey = 0;
-            InputSource inputSource = new StringInput(input);
-            while (inputSource.possibleNextInput()) {
-                char lastKey = inputSource.getNextKey();
-                if (secondLastKey == ':' && lastKey == 'Q') {
-                    break;
-                }
-                secondLastKey = lastKey;
+        char secondLastKey = 0;
+        InputSource inputSource = new StringInput(input);
+        while (inputSource.possibleNextInput()) {
+            char lastKey = inputSource.getNextKey();
+            if (secondLastKey == ':' && lastKey == 'Q') {
+                break;
             }
-            return inputSource.getTiles();
+            secondLastKey = lastKey;
         }
+        return inputSource.getTiles();
+    }
 }
