@@ -16,11 +16,6 @@ public class Engine {
 
     public static void main(String[] args)  {
         Engine e = new Engine();
-        TETile[][] a = generateTiles("n5197880843569031643s");
-        TETile[][] b = generateTiles("N5197880843569031643sN");
-        if (Arrays.deepEquals(a, b)) {
-            System.out.printf("1");
-        }
 
         /*e.interactWithKeyboard();*/
         /*e.interactWithInputString("N999SDDDWWWDDD");*/
@@ -36,7 +31,11 @@ public class Engine {
         e.interactWithInputString("L:Q");
         e.interactWithInputString("LWWWDDD");*/
 
-
+        /*TETile[][] a = generateTiles("n5197880843569031643s");
+        TETile[][] b = generateTiles("N5197880843569031643sN");
+        if (Arrays.deepEquals(a, b)) {
+            System.out.printf("1");
+        }*/
     }
 
     /**
@@ -74,18 +73,28 @@ public class Engine {
     }
 
     public static TETile[][] generateTilesFromNtoS(String input) {
-        int indexOfS = -1;
-        for (int i = 0; i < input.length(); i ++) {
-            if (input.charAt(i) == 'S' || input.charAt(i) == 's') {
-                indexOfS = i;
-                break;
-            }
+        if (input== null || input.isBlank()) {
+            return null;
         }
-        //build 2D TETile according number from N to S;
-        long seed = Long.parseLong(input.substring(1, indexOfS));
-        TETile[][] world = new TETile[WIDTH][HEIGHT - 3];
-        WorldGenerator worldGen = new WorldGenerator(world, seed);
-        return worldGen.getWorld();
+        
+        int indexOfN = input.indexOf('N');
+        if (indexOfN < 0) {
+            indexOfN = input.indexOf('n');
+        }
+        int indexOfS = input.indexOf('S');
+        if (indexOfS < 0) {
+            indexOfS = input.indexOf('s');
+        }
+
+        if (indexOfN >= 0 && indexOfS > indexOfN + 1) {
+            TETile[][] world = new TETile[WIDTH][HEIGHT - 3];
+            //build 2D TETile according number from N to S;
+            long seed = Long.parseLong(input.substring(indexOfN + 1, indexOfS));
+            System.out.printf(String.valueOf(seed));
+            WorldGenerator worldGen = new WorldGenerator(world, seed);
+            return worldGen.getWorld();
+        }
+        return null;
     }
 
     public static TETile[][] moveTilesFromWSAD(TETile[][] tiles, String input) {
