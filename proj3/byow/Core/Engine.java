@@ -33,6 +33,20 @@ public class Engine {
 
         TETile[][] a = generateTiles("n5197880843569031643s");
         TETile[][] b = generateTiles("N5197880843569031643sN");
+        for (int x =0; x < a.length; x++) {
+            for (int y = 0; y < a[0].length; y++) {
+                if (a[x][y] == null) {
+                    System.out.printf("anull");
+                }
+                if (b[x][y] == null) {
+                    System.out.printf("bnull");
+                }
+                if (!a[x][y].equals(b[x][y])) {
+                    System.out.printf("notEqual");
+                }
+
+            }
+        }
         if (Arrays.deepEquals(a, b)) {
             System.out.printf("1");
         }
@@ -73,9 +87,8 @@ public class Engine {
     }
 
     public static TETile[][] generateTilesFromNtoS(String input) {
-        TETile[][] world = new TETile[WIDTH][HEIGHT - 3];
         if (input== null || input.isBlank()) {
-            return world;
+            return null;
         }
 
         int indexOfN = -1;
@@ -91,12 +104,15 @@ public class Engine {
             }
         }
 
-        if (indexOfN >= 0 && indexOfS > indexOfN + 1) {
-            //build 2D TETile according number from N to S;
-            long seed = Long.parseLong(input.substring(indexOfN + 1, indexOfS));
-            WorldGenerator worldGen = new WorldGenerator(world, seed);
-            world = worldGen.getWorld();
+        if (indexOfN == -1 || indexOfS == -1) {
+            return null;
         }
+
+        //build 2D TETile according number from N to S;
+        TETile[][] world = new TETile[WIDTH][HEIGHT - 3];
+        long seed = Long.parseLong(input.substring(indexOfN + 1, indexOfS));
+        WorldGenerator worldGen = new WorldGenerator(world, seed);
+        world = worldGen.getWorld();
         return world;
     }
 
