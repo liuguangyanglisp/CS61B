@@ -3,6 +3,8 @@ import byow.TileEngine.TERenderer;
 import byow.TileEngine.TETile;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+
 import static byow.Core.WorldGenerator.movePlayer;
 
 
@@ -14,7 +16,13 @@ public class Engine {
 
     public static void main(String[] args)  {
         Engine e = new Engine();
-        e.interactWithKeyboard();
+        TETile[][] a = generateTiles("n5197880843569031643s");
+        TETile[][] b = generateTiles("N5197880843569031643sN");
+        if (Arrays.deepEquals(a, b)) {
+            System.out.printf("1");
+        }
+
+        /*e.interactWithKeyboard();*/
         /*e.interactWithInputString("N999SDDDWWWDDD");*/
         /*e.interactWithInputString("N999SDDD:Q");
         e.interactWithInputString("LWWWDDD");*/
@@ -66,7 +74,13 @@ public class Engine {
     }
 
     public static TETile[][] generateTilesFromNtoS(String input) {
-        int indexOfS = input.indexOf("S");
+        int indexOfS = -1;
+        for (int i = 0; i < input.length(); i ++) {
+            if (input.charAt(i) == 'S' || input.charAt(i) == 's') {
+                indexOfS = i;
+                break;
+            }
+        }
         //build 2D TETile according number from N to S;
         long seed = Long.parseLong(input.substring(1, indexOfS));
         TETile[][] world = new TETile[WIDTH][HEIGHT - 3];
