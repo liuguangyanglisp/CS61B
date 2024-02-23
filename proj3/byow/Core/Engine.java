@@ -58,9 +58,10 @@ public class Engine {
 
         //Move TETile according move chars.
         int indexOfS = input.indexOf("S");
-        String stringAfterS = input.substring(indexOfS);
-        tiles = moveTilesFromWSAD(tiles, stringAfterS);
-
+        if (indexOfS + 1 < input.length()) {
+            String stringAfterS = input.substring(indexOfS + 1);
+            tiles = moveTilesFromWSAD(tiles, stringAfterS);
+        }
         return tiles;
     }
 
