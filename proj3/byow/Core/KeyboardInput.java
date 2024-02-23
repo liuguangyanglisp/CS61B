@@ -79,6 +79,12 @@ public class KeyboardInput implements InputSource{
     public boolean possibleNextInput() {
         return true;
     }
+
+    @Override
+    public TETile[][] getTiles() {
+        return tiles;
+    }
+
     private void displayMenu() {
         StdDraw.setCanvasSize(width, height);
         StdDraw.setXscale(0, width);

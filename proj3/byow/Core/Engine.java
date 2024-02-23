@@ -17,6 +17,8 @@ public class Engine {
     public static void main(String[] args)  {
         Engine e = new Engine();
 
+
+
         /*e.interactWithKeyboard();*/
         /*e.interactWithInputString("N999SDDDWWWDDD");*/
         /*e.interactWithInputString("N999SDDD:Q");
@@ -31,8 +33,8 @@ public class Engine {
         e.interactWithInputString("L:Q");
         e.interactWithInputString("LWWWDDD");*/
 
-        TETile[][] a = generateTiles("n5197880843569031643s");
-        TETile[][] b = generateTiles("N5197880843569031643sN");
+        /*TETile[][] a = generateTiles("n5197880843569031643s");
+        TETile[][] b = e.interactWithInputString("n5197880843569031643s");
         for (int x =0; x < a.length; x++) {
             for (int y = 0; y < a[0].length; y++) {
                 if (a[x][y] == null) {
@@ -50,6 +52,9 @@ public class Engine {
         if (Arrays.deepEquals(a, b)) {
             System.out.printf("1");
         }
+
+        e.ter.initialize(WIDTH, HEIGHT);
+        e.ter.renderFrame(b);*/
     }
 
     /**
@@ -57,7 +62,6 @@ public class Engine {
      * including inputs from the main menu.
      */
     public void interactWithKeyboard() {
-        try {
             char secondLastKey = 0;
             InputSource inputSource = new KeyboardInput();
             while (inputSource.possibleNextInput()) {
@@ -67,9 +71,6 @@ public class Engine {
                 }
                 secondLastKey = lastKey;
             }
-        } catch (IOException excp) {
-            throw new IllegalArgumentException(excp.getMessage());
-        }
     }
 
 
@@ -188,7 +189,6 @@ public class Engine {
         //
         // See proj3.byow.InputDemo for a demo of how you can make a nice clean interface
         // that works for many different input types.
-        try {
             char secondLastKey = 0;
             InputSource inputSource = new StringInput(input);
             while (inputSource.possibleNextInput()) {
@@ -198,10 +198,6 @@ public class Engine {
                 }
                 secondLastKey = lastKey;
             }
-            String stringInFile = readGame("string.txt");
-            return generateTiles(stringInFile);
-        } catch (IOException excp) {
-            throw new IllegalArgumentException(excp.getMessage());
-        }
+            return inputSource.getTiles();
         }
 }

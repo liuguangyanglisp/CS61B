@@ -56,4 +56,8 @@ public class StringInput implements InputSource{
     public boolean possibleNextInput() {
         return index < input.length();
     }
+
+    public TETile[][] getTiles() {
+        return tiles;
+    }
 }
