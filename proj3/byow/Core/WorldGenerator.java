@@ -110,7 +110,7 @@ public class WorldGenerator {
             drawTile(p, Tileset.FLOOR);
         }
 
-        while (p.getY()!= end.getY()) {
+        while (p.getY() != end.getY()) {
             if (p.getY() < end.getY()) {
                 p = p.move(0, 1);
             } else {
