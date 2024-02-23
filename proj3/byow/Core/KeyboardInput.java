@@ -5,7 +5,6 @@ import byow.TileEngine.TETile;
 import edu.princeton.cs.introcs.StdDraw;
 
 import java.awt.*;
-import java.io.IOException;
 
 import static byow.Core.Engine.*;
 import static byow.Core.WorldGenerator.movePlayer;
@@ -23,7 +22,7 @@ public class KeyboardInput implements InputSource{
         displayMenu();
     }
     @Override
-    public char getNextKey() throws IOException {
+    public char getNextKey() {
         while (true) {
             if (StdDraw.hasNextKeyTyped()) {
                 char key = Character.toUpperCase(StdDraw.nextKeyTyped());

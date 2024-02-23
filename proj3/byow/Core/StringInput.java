@@ -1,9 +1,6 @@
 package byow.Core;
 
-import byow.TileEngine.TERenderer;
 import byow.TileEngine.TETile;
-
-import java.io.IOException;
 
 import static byow.Core.Engine.*;
 import static byow.Core.WorldGenerator.movePlayer;
@@ -11,7 +8,6 @@ import static byow.Core.WorldGenerator.movePlayer;
 public class StringInput implements InputSource{
     private String input;
     private int index;
-    private TERenderer ter = new TERenderer();
 
     private TETile[][] tiles;
 
@@ -22,7 +18,7 @@ public class StringInput implements InputSource{
         input = s;
     }
 
-    public char getNextKey() throws IOException {
+    public char getNextKey() {
         char key = input.charAt(index);
         if (tiles == null) {
             int length = gameCommand.length();

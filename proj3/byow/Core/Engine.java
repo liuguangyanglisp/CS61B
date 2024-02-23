@@ -1,23 +1,10 @@
 package byow.Core;
-
-import byow.InputDemo.KeyboardInputSource;
-import byow.InputDemo.StringInputDevice;
 import byow.TileEngine.TERenderer;
 import byow.TileEngine.TETile;
-import com.google.common.io.ByteProcessor;
-import com.google.common.io.Files;
-import edu.princeton.cs.introcs.StdDraw;
-
-import java.awt.*;
-import java.io.File;
-import java.io.IOException;
-import java.nio.charset.Charset;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
-import java.util.List;
-
 import static byow.Core.WorldGenerator.movePlayer;
-import static byow.TileEngine.TERenderer.getTileSize;
+
 
 public class Engine {
     TERenderer ter = new TERenderer();
@@ -25,8 +12,9 @@ public class Engine {
     public static final int WIDTH = 100;
     public static final int HEIGHT = 40;
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args)  {
         Engine e = new Engine();
+        e.interactWithKeyboard();
         /*e.interactWithInputString("N999SDDDWWWDDD");*/
         /*e.interactWithInputString("N999SDDD:Q");
         e.interactWithInputString("LWWWDDD");*/
@@ -35,10 +23,10 @@ public class Engine {
         e.interactWithInputString("LWWW:Q");
         e.interactWithInputString("LDDD:Q");*/
 
-        e.interactWithInputString("N999SDDD:Q");
+        /*e.interactWithInputString("N999SDDD:Q");
         e.interactWithInputString("L:Q");
         e.interactWithInputString("L:Q");
-        e.interactWithInputString("LWWWDDD");
+        e.interactWithInputString("LWWWDDD");*/
 
 
     }
@@ -47,15 +35,19 @@ public class Engine {
      * Method used for exploring a fresh world. This method should handle all inputs,
      * including inputs from the main menu.
      */
-    public void interactWithKeyboard() throws IOException {
-        char secondLastKey = 0;
-        InputSource inputSource = new KeyboardInput();
-        while (inputSource.possibleNextInput()) {
-            char lastKey = inputSource.getNextKey();
-            if (secondLastKey == ':' && lastKey == 'Q') {
-                return;
+    public void interactWithKeyboard() {
+        try {
+            char secondLastKey = 0;
+            InputSource inputSource = new KeyboardInput();
+            while (inputSource.possibleNextInput()) {
+                char lastKey = inputSource.getNextKey();
+                if (secondLastKey == ':' && lastKey == 'Q') {
+                    return;
+                }
+                secondLastKey = lastKey;
             }
-            secondLastKey = lastKey;
+        } catch (IOException excp) {
+            throw new IllegalArgumentException(excp.getMessage());
         }
     }
 
@@ -97,19 +89,31 @@ public class Engine {
 
     }
 
-    public static void saveGame(String txtFileName, String gameCommand) throws IOException {
+    public static void saveGame(String txtFileName, String gameCommand) {
         File txtFile = new File(txtFileName);
-        Files.write(gameCommand, txtFile, StandardCharsets.UTF_8);
+        if (!txtFile.isFile()) {
+            return;
+        }
+        try {
+            BufferedOutputStream str =
+                    new BufferedOutputStream(java.nio.file.Files.newOutputStream(txtFile.toPath()));
+            str.write(gameCommand.getBytes(StandardCharsets.UTF_8));
+            str.close();
+        } catch (IOException | ClassCastException excp) {
+            throw new IllegalArgumentException(excp.getMessage());
+        }
     }
 
-    public static String readGame(String txtFileName) throws IOException {
-        File txtFile = new File(txtFileName);
-        if (!txtFile.exists()) {
+    public static String readGame(String txtFileName) {
+        File file = new File(txtFileName);
+        if (!file.isFile()) {
             return "";
         }
-        List<String> gameCommandList = Files.readLines(txtFile, StandardCharsets.UTF_8);
-        String command = String.join("", gameCommandList);
-        return command;
+        try {
+            return new String(java.nio.file.Files.readAllBytes(file.toPath()));
+        } catch (IOException excp) {
+            throw new IllegalArgumentException(excp.getMessage());
+        }
     }
 
     /**
@@ -133,7 +137,7 @@ public class Engine {
      * @param input the input string to feed to your program
      * @return the 2D TETile[][] representing the state of the world
      */
-    public TETile[][] interactWithInputString(String input) throws IOException {
+    public TETile[][] interactWithInputString(String input) {
         // Fill out this method so that it run the engine using the input
         // passed in as an argument, and return a 2D tile representation of the
         // world that would have been drawn if the same inputs had been given
@@ -141,17 +145,20 @@ public class Engine {
         //
         // See proj3.byow.InputDemo for a demo of how you can make a nice clean interface
         // that works for many different input types.
-        char secondLastKey = 0;
-        InputSource inputSource = new StringInput(input);
-        while (inputSource.possibleNextInput()) {
-            char lastKey = inputSource.getNextKey();
-            if (secondLastKey == ':' && lastKey == 'Q') {
-                break;
+        try {
+            char secondLastKey = 0;
+            InputSource inputSource = new StringInput(input);
+            while (inputSource.possibleNextInput()) {
+                char lastKey = inputSource.getNextKey();
+                if (secondLastKey == ':' && lastKey == 'Q') {
+                    break;
+                }
+                secondLastKey = lastKey;
             }
-            secondLastKey = lastKey;
+            String stringInFile = readGame("string.txt");
+            return generateTiles(stringInFile);
+        } catch (IOException excp) {
+            throw new IllegalArgumentException(excp.getMessage());
         }
-        String stringInFile = readGame("string.txt");
-        return generateTiles(stringInFile);
         }
-
 }
